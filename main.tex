@@ -1,0 +1,135 @@
+\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
+\usepackage{helvet} % DO NOT CHANGE THIS
+\usepackage{courier}  % DO NOT CHANGE THIS
+\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
+\usepackage{graphicx} % DO NOT CHANGE THIS
+\urlstyle{rm} % DO NOT CHANGE THIS
+\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+
+%% additional packages
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{xspace}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+% \usepackage{algpseudocode}
+\usepackage{parskip}
+\usepackage{amsthm}
+\usepackage{subfig}
+\usepackage{xcolor}
+%%%%%%%%%%%%%%%%
+% \usepackage{tikz}
+% \usetikzlibrary{fit,calc}
+% %define a marking command
+% \newcommand*{\tikzmk}[1]{\tikz[remember picture,overlay,] \node (#1) {};\ignorespaces}
+% %define a boxing command, argument = colour of box
+% \newcommand{\boxit}[1]{\tikz[remember picture,overlay]{\node[yshift=3pt,fill=#1,opacity=.25,fit={(A)($(B)+(.95\linewidth,.8\baselineskip)$)}] {};}\ignorespaces}
+% %define some colours according to algorithm parts (or any other method you like)
+% \colorlet{pink}{red!40}
+% \colorlet{blue}{cyan!60}
+%%%%%%%%
+
+\frenchspacing  % DO NOT CHANGE THIS
+\setlength{\pdfpagewidth}{8.5in}  % DO NOT CHANGE THIS
+\setlength{\pdfpageheight}{11in}  % DO NOT CHANGE THIS
+
+
+% \title{Zero time replanning}
+
+% \author{Fahad Islam}
+
+% \date{\today}
+
+\begin{document}
+% \maketitle
+
+\begin{algorithm}
+\caption{\textsc{PreprocessMain()}}
+% Precompute trunks $\{\Pi_{G^{\textrm{full}}}\}$ from $s_{\textrm{home}}$ that cover $G^{\textrm{full}}$
+
+\begin{algorithmic}[1]
+\State $\{\Pi_{G^{\textrm{full}}}\}, G'_{\textrm{full}} \leftarrow$ \textsc{ComputeTrunks}($s_{\textrm{home}},G_{\textrm{full}}$)
+\State \textsc{Preprocess}($s_{\textrm{home}},G_{\textrm{full}},\phi$)
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{\textsc{Preprocess}($s_{\textrm{start}},G_{\textrm{REM}},G_{\textrm{COV}}$)}\label{alg:1}
+\begin{algorithmic}[1]
+\State $\{\Pi_{G_{\textrm{REM}}}\}, G'_{\textrm{REM}} \leftarrow$ \textsc{ComputeTrunks}($s_{\textrm{start}},G_{\textrm{REM}}$)
+
+% \State $G'_{\textrm{COV}} \leftarrow G'_{\textrm{COV}} \bigcup G_{\textrm{COV}}$
+\State $G'_{\textrm{COV}} \leftarrow G_{\textrm{COV}} \cup (G_{\textrm{REM}} - G'_{\textrm{REM}})$
+\If{$t(s_{\textrm{start}}) \geq t_{rc}$}
+    \State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
+\EndIf
+\For {each $\Pi_{G_i} \in \{\Pi_G\}$}
+    \State $t = t_{rc}$
+    \State $G_{\textrm{rem}} \leftarrow G'_{\textrm{COV}}$
+    \State $G_{\textrm{cov}} \leftarrow \phi$ 
+    \While{$t \neq t(s_{\textrm{start}})$}
+        \State $s \leftarrow$ \textsc{GetState($\Pi_{G_i}, t$)}
+        %% LATCHING BEGIN
+       {\color{blue}
+       \For {each $\Pi_{G_j} \in \{\Pi_{G^{\textrm{full}}}\}$}
+            \If{\textsc{Latch}($s,\Pi_{G_j}$)}
+                \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_j$
+                \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_j$
+            \EndIf
+        \EndFor
+        \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_i$
+        \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_i$
+        }
+        %% LATCHING END
+        \If{$G_{\textrm{rem}} = \phi$}
+            \State \textbf{break}
+        \EndIf
+        \State $G_{\textrm{rem}},G_{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_{\textrm{rem}},G_{\textrm{cov}}$)
+        \If{$G_{\textrm{rem}} = \phi$}
+            \State \textbf{break}
+        \EndIf
+        \State $t = t - \delta t$
+    \EndWhile
+    % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
+\EndFor
+\State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
+
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{\textsc{Query}($g, \pi_{\textrm{curr}},t_{\textrm{curr}}$)}\label{alg:1}
+\begin{algorithmic}[1]
+\State $t = t_{rc}$
+\While{$t \neq t_{\textrm{curr}}$}
+    \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
+    \State $\Pi_{\textrm{next}} \leftarrow$  \textsc{LookupTrunkPath}($s,g$)
+    \If{$\Pi_{\textrm{next}} \neq \phi$}
+        \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{next}}$)
+        \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}}$)
+        \State \textbf{return} $\pi$
+    \Else
+        {\color{blue}
+        \State $\Pi_{\textrm{home}} \leftarrow$ \textsc{LookupTrunkPath}($s_{\textrm{home}},g$)
+        \If{$\Pi_{\textrm{home}} \neq \phi$}
+            \If{\textsc{Latch}($s,\Pi_{\textrm{home}}$)}
+                \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{home}}$)
+                \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
+                \State \textbf{return} $\pi$
+            \EndIf
+        \EndIf
+        \State $s_{\textrm{start}} \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, 0$)
+        \State $\Pi_{\textrm{curr}} \leftarrow$ \textsc{LookupTrunkPath}($s_{\textrm{start}},g$)
+            % \State \textbf{return} $\pi_{\textrm{curr}}$
+        \If{$\Pi_{\textrm{curr}} \neq \phi$}
+            \State \textbf{return} $\pi_{\textrm{curr}}$
+        \EndIf
+        }
+    \EndIf
+    \State $t = t - \delta t$
+\EndWhile
+\State \textbf{return failure}
+\end{algorithmic}
+\end{algorithm}
+\end{document}
