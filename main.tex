@@ -47,57 +47,63 @@
 \begin{algorithm}
 \caption{\textsc{PreprocessMain()}}
 % Precompute trunks $\{\Pi_{G^{\textrm{full}}}\}$ from $s_{\textrm{home}}$ that cover $G^{\textrm{full}}$
-
+\hspace*{\algorithmicindent} \textbf{Inputs} $s_{\textrm{home}}, G^{\textrm{full}}$ \\
+% \hspace*{\algorithmicindent} \textbf{Output} 
 \begin{algorithmic}[1]
-\State $\{\Pi_{G^{\textrm{full}}}\}, G'_{\textrm{full}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{home}},G_{\textrm{full}}$)
-\State \textsc{Preprocess}($s_{\textrm{home}},G_{\textrm{full}},\phi$)
+% \State $\Psi_{\textrm{home}}, G'^{\textrm{full}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{home}},G^{\textrm{full}}$)
+\State \textsc{Preprocess}($s_{\textrm{home}},G^{\textrm{full}},\Phi$)
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{\textsc{Preprocess}($s_{\textrm{start}},G_{\textrm{REM}},G_{\textrm{COV}}$)}\label{alg:1}
+\caption{\textsc{Preprocess}($s_{\textrm{start}},G^{\textrm{UNCOV}},G^{\textrm{COV}}$)}\label{alg:1}
 \begin{algorithmic}[1]
-\State $\{\Pi_{G_{\textrm{REM}}}\}, G'_{\textrm{REM}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{start}},G_{\textrm{REM}}$)
+\State $\Psi_{\textrm{work}}, G'^{\textrm{UNCOV}}_{\textrm{work}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{start}},G^{\textrm{UNCOV}}$)
 
-% \State $G'_{\textrm{COV}} \leftarrow G'_{\textrm{COV}} \bigcup G_{\textrm{COV}}$
-\State $G'_{\textrm{COV}} \leftarrow G_{\textrm{COV}} \cup (G_{\textrm{REM}} - G'_{\textrm{REM}})$
-\If{$t(s_{\textrm{start}}) \geq t_{rc}$}
-    \State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
+\If {$s_{\textrm{start}} = s_{\textrm{home}}$}
+    \State $\Psi_{\textrm{home}} = \Psi_{\textrm{work}}$
 \EndIf
-\For {each $\Pi_{G_i} \in \{\Pi_{G_{\textrm{REM}}}\}$}
+% \State $G'^{\textrm{COV}} \leftarrow G'^{\textrm{COV}} \bigcup G^{\textrm{COV}}$
+\State $G'^{\textrm{COV}} \leftarrow G^{\textrm{COV}} \cup (G^{\textrm{UNCOV}} - G'^{\textrm{UNCOV}}_{\textrm{work}})$
+\If{$t(s_{\textrm{start}}) \geq t_{rc}$}
+    \State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
+\EndIf
+\For {each $(\Pi_{G_i}, G_i) \in \Psi_{\textrm{work}}$}
+% \For {$i \leftarrow$ 1 to $|\{\Pi_{\textrm{work}}\}|$}
+    % \State $\Pi_{G_i}, G_i \leftarrow$ \textsc{GetRootPathAndGoalRegion}($s_{\textrm{start}},i$)
     \State $t = t_{rc}$
-    \State $G_{\textrm{rem}} \leftarrow G'_{\textrm{COV}} - G_i$
-    \State $G_{\textrm{cov}} \leftarrow G_i$
+    \State $G_i^{\textrm{uncov}} \leftarrow G'^{\textrm{COV}} - G_i$
+    \State $G_i^{\textrm{cov}} \leftarrow G_i$
 
     % {\color{BrickRed}
-    % \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_i$
-    % \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_i$
+    % \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} - G_i$
+    % \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_i$
     % }
     
     \While{$t \geq t(s_{\textrm{start}})$}
         \State $s \leftarrow$ \textsc{GetState($\Pi_{G_i}, t$)}
-        %% LATCHING BEGIN
-      {\color{blue}
-       \For {each $\Pi_{G_j} \in \{\Pi_{G^{\textrm{full}}}\}$}
+        %%%%%%% LATCHING BEGIN
+      % {\color{blue}
+       \For {each $\Pi_{G_j} \in \Psi_{\textrm{home}}$}
             \If{\textsc{CheckSnap}($s,\Pi_{G_j}$)}
-                \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_j$
-                \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_j$
-            \EndIf}
-        % }
+                \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} - G_j$
+                \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_j$
+            \EndIf
         \EndFor
-        %% LATCHING END
-        \If{$G_{\textrm{rem}} = \phi$}
+        % }
+        %%%%%%%%% LATCHING END
+        \If{$G_i^{\textrm{uncov}} = \Phi$}
             \State \textbf{break}
         \EndIf
-        \State $G_{\textrm{rem}},G_{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_{\textrm{rem}},G_{\textrm{cov}}$)
-        \If{$G_{\textrm{rem}} = \phi$}
+        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)
+        \If{$G_i^{\textrm{uncov}} = \Phi$}
             \State \textbf{break}
         \EndIf
         \State $t = t - \delta t$
     \EndWhile
     % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
 \EndFor
-\State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
+\State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
 
 \end{algorithmic}
 \end{algorithm}
@@ -110,24 +116,24 @@
     \State $s_{\textrm{start}} \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, 0$) \Comment{First state on $\pi_{\textrm{curr}}$}
     \State $\Pi_{\textrm{curr}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{start}},g$)
         % \State \textbf{return} $\pi_{\textrm{curr}}$
-    \If{$\Pi_{\textrm{curr}} \neq \phi$}
+    \If{$\Pi_{\textrm{curr}} \neq \Phi$}
         \State \textbf{return} $\pi_{\textrm{curr}}$
     \EndIf
     % }
-%%%%%%%%%%%55
+
 \State $t = t_{rc}$
 \While{$t \geq t_{\textrm{curr}}$}
     \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
     \State $\Pi_{\textrm{next}} \leftarrow$  \textsc{LookupRootPath}($s,g$)
-    \If{$\Pi_{\textrm{next}} \neq \phi$}
+    \If{$\Pi_{\textrm{next}} \neq \Phi$}
         \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{next}}$)
         \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}}$)
         \State \textbf{return} $\pi$
     \EndIf
-%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%LATCHING 
     {\color{blue}
     \State $\Pi_{\textrm{home}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{home}},g$)
-    \If{$\Pi_{\textrm{home}} \neq \phi$}
+    \If{$\Pi_{\textrm{home}} \neq \Phi$}
         \If{\textsc{CheckSnap}($s,\Pi_{\textrm{home}}$)}
             \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{home}}$)
             \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
@@ -135,7 +141,7 @@
         \EndIf
     \EndIf
     }
-
+%%%%%%%%%%%
     \State $t = t - \delta t$
 \EndWhile
 \State \textbf{return failure}
