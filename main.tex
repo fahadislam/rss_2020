@@ -17,7 +17,7 @@
 \usepackage{parskip}
 \usepackage{amsthm}
 \usepackage{subfig}
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 %%%%%%%%%%%%%%%%
 % \usepackage{tikz}
 % \usetikzlibrary{fit,calc}
@@ -49,7 +49,7 @@
 % Precompute trunks $\{\Pi_{G^{\textrm{full}}}\}$ from $s_{\textrm{home}}$ that cover $G^{\textrm{full}}$
 
 \begin{algorithmic}[1]
-\State $\{\Pi_{G^{\textrm{full}}}\}, G'_{\textrm{full}} \leftarrow$ \textsc{ComputeTrunks}($s_{\textrm{home}},G_{\textrm{full}}$)
+\State $\{\Pi_{G^{\textrm{full}}}\}, G'_{\textrm{full}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{home}},G_{\textrm{full}}$)
 \State \textsc{Preprocess}($s_{\textrm{home}},G_{\textrm{full}},\phi$)
 \end{algorithmic}
 \end{algorithm}
@@ -57,30 +57,34 @@
 \begin{algorithm}
 \caption{\textsc{Preprocess}($s_{\textrm{start}},G_{\textrm{REM}},G_{\textrm{COV}}$)}\label{alg:1}
 \begin{algorithmic}[1]
-\State $\{\Pi_{G_{\textrm{REM}}}\}, G'_{\textrm{REM}} \leftarrow$ \textsc{ComputeTrunks}($s_{\textrm{start}},G_{\textrm{REM}}$)
+\State $\{\Pi_{G_{\textrm{REM}}}\}, G'_{\textrm{REM}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{start}},G_{\textrm{REM}}$)
 
 % \State $G'_{\textrm{COV}} \leftarrow G'_{\textrm{COV}} \bigcup G_{\textrm{COV}}$
 \State $G'_{\textrm{COV}} \leftarrow G_{\textrm{COV}} \cup (G_{\textrm{REM}} - G'_{\textrm{REM}})$
 \If{$t(s_{\textrm{start}}) \geq t_{rc}$}
     \State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
 \EndIf
-\For {each $\Pi_{G_i} \in \{\Pi_G\}$}
+\For {each $\Pi_{G_i} \in \{\Pi_{G_{\textrm{REM}}}\}$}
     \State $t = t_{rc}$
-    \State $G_{\textrm{rem}} \leftarrow G'_{\textrm{COV}}$
-    \State $G_{\textrm{cov}} \leftarrow \phi$ 
-    \While{$t \neq t(s_{\textrm{start}})$}
+    \State $G_{\textrm{rem}} \leftarrow G'_{\textrm{COV}} - G_i$
+    \State $G_{\textrm{cov}} \leftarrow G_i$
+
+    % {\color{BrickRed}
+    % \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_i$
+    % \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_i$
+    % }
+    
+    \While{$t \geq t(s_{\textrm{start}})$}
         \State $s \leftarrow$ \textsc{GetState($\Pi_{G_i}, t$)}
         %% LATCHING BEGIN
-       {\color{blue}
+      {\color{blue}
        \For {each $\Pi_{G_j} \in \{\Pi_{G^{\textrm{full}}}\}$}
-            \If{\textsc{Latch}($s,\Pi_{G_j}$)}
+            \If{\textsc{CheckSnap}($s,\Pi_{G_j}$)}
                 \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_j$
                 \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_j$
-            \EndIf
+            \EndIf}
+        % }
         \EndFor
-        \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_i$
-        \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_i$
-        }
         %% LATCHING END
         \If{$G_{\textrm{rem}} = \phi$}
             \State \textbf{break}
@@ -101,32 +105,37 @@
 \begin{algorithm}
 \caption{\textsc{Query}($g, \pi_{\textrm{curr}},t_{\textrm{curr}}$)}\label{alg:1}
 \begin{algorithmic}[1]
+%%%%%%%%%%%%%%%%%
+    % {\color{BrickRed}
+    \State $s_{\textrm{start}} \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, 0$) \Comment{First state on $\pi_{\textrm{curr}}$}
+    \State $\Pi_{\textrm{curr}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{start}},g$)
+        % \State \textbf{return} $\pi_{\textrm{curr}}$
+    \If{$\Pi_{\textrm{curr}} \neq \phi$}
+        \State \textbf{return} $\pi_{\textrm{curr}}$
+    \EndIf
+    % }
+%%%%%%%%%%%55
 \State $t = t_{rc}$
-\While{$t \neq t_{\textrm{curr}}$}
+\While{$t \geq t_{\textrm{curr}}$}
     \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
-    \State $\Pi_{\textrm{next}} \leftarrow$  \textsc{LookupTrunkPath}($s,g$)
+    \State $\Pi_{\textrm{next}} \leftarrow$  \textsc{LookupRootPath}($s,g$)
     \If{$\Pi_{\textrm{next}} \neq \phi$}
         \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{next}}$)
         \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}}$)
         \State \textbf{return} $\pi$
-    \Else
-        {\color{blue}
-        \State $\Pi_{\textrm{home}} \leftarrow$ \textsc{LookupTrunkPath}($s_{\textrm{home}},g$)
-        \If{$\Pi_{\textrm{home}} \neq \phi$}
-            \If{\textsc{Latch}($s,\Pi_{\textrm{home}}$)}
-                \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{home}}$)
-                \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
-                \State \textbf{return} $\pi$
-            \EndIf
-        \EndIf
-        \State $s_{\textrm{start}} \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, 0$)
-        \State $\Pi_{\textrm{curr}} \leftarrow$ \textsc{LookupTrunkPath}($s_{\textrm{start}},g$)
-            % \State \textbf{return} $\pi_{\textrm{curr}}$
-        \If{$\Pi_{\textrm{curr}} \neq \phi$}
-            \State \textbf{return} $\pi_{\textrm{curr}}$
-        \EndIf
-        }
     \EndIf
+%%%%%%%%%%%%%%%%%%%%%%%5
+    {\color{blue}
+    \State $\Pi_{\textrm{home}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{home}},g$)
+    \If{$\Pi_{\textrm{home}} \neq \phi$}
+        \If{\textsc{CheckSnap}($s,\Pi_{\textrm{home}}$)}
+            \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{home}}$)
+            \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
+            \State \textbf{return} $\pi$
+        \EndIf
+    \EndIf
+    }
+
     \State $t = t - \delta t$
 \EndWhile
 \State \textbf{return failure}
