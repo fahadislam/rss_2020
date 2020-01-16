@@ -45,100 +45,153 @@
 % \maketitle
 
 \begin{algorithm}
-\caption{\textsc{PreprocessMain()}}
+\caption{\textsc{PreprocessMain()}}\label{alg:1}
 % Precompute trunks $\{\Pi_{G^{\textrm{full}}}\}$ from $s_{\textrm{home}}$ that cover $G^{\textrm{full}}$
-
+\hspace*{\algorithmicindent} \textbf{Inputs} $s_{\textrm{home}}, G^{\textrm{full}}$ \\
+% \hspace*{\algorithmicindent} \textbf{Output} 
 \begin{algorithmic}[1]
-\State $\{\Pi_{G^{\textrm{full}}}\}, G'_{\textrm{full}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{home}},G_{\textrm{full}}$)
-\State \textsc{Preprocess}($s_{\textrm{home}},G_{\textrm{full}},\phi$)
+% \State $\Psi_{\textrm{home}}, G'^{\textrm{full}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{home}},G^{\textrm{full}}$)
+\State \textsc{Preprocess}($s_{\textrm{home}},G^{\textrm{full}},\Phi$)
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{\textsc{Preprocess}($s_{\textrm{start}},G_{\textrm{REM}},G_{\textrm{COV}}$)}\label{alg:1}
+\caption{\textsc{Preprocess}($s_{\textrm{start}},G^{\textrm{UNCOV}},G^{\textrm{COV}}$)}\label{alg:2}
 \begin{algorithmic}[1]
-\State $\{\Pi_{G_{\textrm{REM}}}\}, G'_{\textrm{REM}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{start}},G_{\textrm{REM}}$)
+\State $\Psi_{\textrm{work}}, G'^{\textrm{UNCOV}}_{\textrm{work}} \leftarrow$ \textsc{ComputeRootPaths\&GoalRegions}($s_{\textrm{start}},G^{\textrm{UNCOV}}$)
 
-% \State $G'_{\textrm{COV}} \leftarrow G'_{\textrm{COV}} \bigcup G_{\textrm{COV}}$
-\State $G'_{\textrm{COV}} \leftarrow G_{\textrm{COV}} \cup (G_{\textrm{REM}} - G'_{\textrm{REM}})$
-\If{$t(s_{\textrm{start}}) \geq t_{rc}$}
-    \State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
+\If {$s_{\textrm{start}} = s_{\textrm{home}}$}
+    \State $\Psi_{\textrm{home}} = \Psi_{\textrm{work}}$
 \EndIf
-\For {each $\Pi_{G_i} \in \{\Pi_{G_{\textrm{REM}}}\}$}
+% \State $G'^{\textrm{COV}} \leftarrow G'^{\textrm{COV}} \bigcup G^{\textrm{COV}}$
+\State $G'^{\textrm{COV}} \leftarrow G^{\textrm{COV}} \cup (G^{\textrm{UNCOV}} - G'^{\textrm{UNCOV}}_{\textrm{work}})$
+\If{$t(s_{\textrm{start}}) \geq t_{rc}$}
+    \State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
+\EndIf
+\For {\textbf{each} $(\Pi_{G_i}, G_i) \in \Psi_{\textrm{work}}$}
+% \For {$i \leftarrow$ 1 to $|\{\Pi_{\textrm{work}}\}|$}
+    % \State $\Pi_{G_i}, G_i \leftarrow$ \textsc{GetRootPathAndGoalRegion}($s_{\textrm{start}},i$)
     \State $t = t_{rc}$
-    \State $G_{\textrm{rem}} \leftarrow G'_{\textrm{COV}} - G_i$
-    \State $G_{\textrm{cov}} \leftarrow G_i$
+    \State $G_i^{\textrm{uncov}} \leftarrow G'^{\textrm{COV}} - G_i$
+    \State $G_i^{\textrm{cov}} \leftarrow G_i$
 
     % {\color{BrickRed}
-    % \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_i$
-    % \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_i$
+    % \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} - G_i$
+    % \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_i$
     % }
     
     \While{$t \geq t(s_{\textrm{start}})$}
         \State $s \leftarrow$ \textsc{GetState($\Pi_{G_i}, t$)}
-        %% LATCHING BEGIN
-      {\color{blue}
-       \For {each $\Pi_{G_j} \in \{\Pi_{G^{\textrm{full}}}\}$}
+        %%%%%%% LATCHING BEGIN
+      % {\color{blue}
+       \For {\textbf{each} $(\Pi_{G_j}, G_j) \in \Psi_{\textrm{home}}$}
             \If{\textsc{CheckSnap}($s,\Pi_{G_j}$)}
-                \State $G_{\textrm{rem}} \leftarrow G_{\textrm{rem}} - G_j$
-                \State $G_{\textrm{cov}} \leftarrow G_{\textrm{cov}} \cup G_j$
-            \EndIf}
-        % }
+                \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} - G_j$
+                \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_j$
+            \EndIf
         \EndFor
-        %% LATCHING END
-        \If{$G_{\textrm{rem}} = \phi$}
+        % }
+        %%%%%%%%% LATCHING END
+        \If{$G_i^{\textrm{uncov}} = \Phi$}
             \State \textbf{break}
         \EndIf
-        \State $G_{\textrm{rem}},G_{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_{\textrm{rem}},G_{\textrm{cov}}$)
-        \If{$G_{\textrm{rem}} = \phi$}
+        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)
+        \If{$G_i^{\textrm{uncov}} = \Phi$}
             \State \textbf{break}
         \EndIf
         \State $t = t - \delta t$
     \EndWhile
     % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
 \EndFor
-\State \textbf{return} $G'_{\textrm{REM}},G'_{\textrm{COV}}$
+\State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
 
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{\textsc{Query}($g, \pi_{\textrm{curr}},t_{\textrm{curr}}$)}\label{alg:1}
+\caption{\textsc{Query}($g, \pi_{\textrm{curr}},s_{\textrm{start}}$)}\label{alg:3}  
 \begin{algorithmic}[1]
-%%%%%%%%%%%%%%%%%
     % {\color{BrickRed}
-    \State $s_{\textrm{start}} \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, 0$) \Comment{First state on $\pi_{\textrm{curr}}$}
     \State $\Pi_{\textrm{curr}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{start}},g$)
         % \State \textbf{return} $\pi_{\textrm{curr}}$
-    \If{$\Pi_{\textrm{curr}} \neq \phi$}
-        \State \textbf{return} $\pi_{\textrm{curr}}$
+    \If{$\Pi_{\textrm{curr}} \neq \Phi$}
+        \State $\pi \leftarrow$ \textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g,\Pi_{\textrm{curr}}$)
+        \State \textbf{return} $\pi$
     \EndIf
     % }
-%%%%%%%%%%%55
+
 \State $t = t_{rc}$
 \While{$t \geq t_{\textrm{curr}}$}
     \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
     \State $\Pi_{\textrm{next}} \leftarrow$  \textsc{LookupRootPath}($s,g$)
-    \If{$\Pi_{\textrm{next}} \neq \phi$}
-        \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{next}}$)
-        \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}}$)
+    \If{$\Pi_{\textrm{next}} \neq \Phi$}
+        \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g,\Pi_{\textrm{next}}$)
+        \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}},t$)
         \State \textbf{return} $\pi$
     \EndIf
-%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%LATCHING 
     {\color{blue}
     \State $\Pi_{\textrm{home}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{home}},g$)
-    \If{$\Pi_{\textrm{home}} \neq \phi$}
+    \If{$\Pi_{\textrm{home}} \neq \Phi$}
         \If{\textsc{CheckSnap}($s,\Pi_{\textrm{home}}$)}
-            \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPath}($g,\Pi_{\textrm{home}}$)
-            \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
+            \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g,\Pi_{\textrm{home}}$)
+            \State $\pi \leftarrow$ \textsc{MergePathsWithSnap}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, t$)
             \State \textbf{return} $\pi$
         \EndIf
     \EndIf
     }
-
+%%%%%%%%%%%
     \State $t = t - \delta t$
 \EndWhile
 \State \textbf{return failure}
 \end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}
+\caption{\textsc{ComputeRootPaths$\&$GoalRegions}($s_{\textrm{start}}, G^{\textrm{UNCOV}}$)}\label{alg:4}
+\begin{algorithmic}[1]
+\State $\Psi \leftarrow \Phi$   \Comment{A list of pairs ($\Pi, G)$)}
+\State $G'^{\textrm{UNCOV}} \leftarrow \Phi$
+\State $i = 0$
+\While{true}    \Comment{Runs until all $g_i \in G^{\textrm{UNCOV}}$ are sampled and/or covered}
+    \State $g_i \leftarrow$\textsc{SampleRandomUncoveredGoalInRegion}($G^{\textrm{UNCOV}}$)
+    \If{$g_i = \O$}
+        \State \textbf{break}
+    \EndIf
+    \State $\Pi_i \leftarrow$ \textsc{PlanRootPath}($s_{\textrm{start}}, g_i$)
+    \If {$\Pi_i = \Phi$}  \Comment{i.e. path does not exist}
+        \State $G'^{\textrm{UNCOV}} \leftarrow g_j$
+    \EndIf
+    \State $G_i \leftarrow \Phi$
+    \For {\textbf{each} $g_j \in G^{\textrm{UNCOV}}$}
+        \If {$g_j$ is \emph{covered}}
+            \State \textbf{continue}
+        \EndIf
+        \State $\pi_j \leftarrow$\textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g_j,\Pi_i$)
+        \If {$\pi_j \neq \Phi$} \Comment{i.e. planner succeeded}
+            \State Insert $g_j$ in $G_i$
+            \State Mark $g_j$ as \emph{covered}
+        \EndIf
+        
+    \EndFor
+    \State Insert pair $(\Pi_i, G_i)$ in $\Psi$
+    \State $i = i + 1$
+
+\EndWhile
+\State \textbf{return} $\Psi, G'^{\textrm{UNCOV}}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{Undefined Functions}
+\begin{itemize}
+  \item \textsc{GetState}($\pi,t$) returns the state on path $\pi$ with timestamp $t$.
+  \item \textsc{CheckSnap}($s,\Pi$) checks if the robot can snap from state $s$ onto the the path $\Pi$ at the next time stamp of what $s$ is at. It checks if the motion is valid w.r.t. kinematic, dynamic and collision constraints.
+  \item \textsc{LookupRootPath}($s,g$) queries a stored lookup table that maps a start and goal pair to a root path (that could be used to plan path in bounded time).
+  \item \textsc{SampleRandomUncoveredGoalInRegion}($G$) returns a goal in $G$ which is never sampled before and which is still uncovered. If no such goal exists it returns $\O$.
+  \item \textsc{PlanRootPath}($s,g$) uses a search-based planner with motion primitives to plan a path from $s$ to $g$ (details will be in the text).
+  \item \textsc{PlanUsingRootPath}($s,g,\Pi$) uses the e-graph planner to plan a path from $s$ to $g$ using the root path $\Pi$ (details will be in the text).
+  \item \textsc{MergePaths}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments, first being $\pi_i$ starting from its first state up until the state at time stamp $t$, and the second being $\pi_j$ starting from the state at $t$ and up until the end of it.
+  \item \textsc{MergePathsWithSnap}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments with a snapping edge in between, first path being $\pi_i$ starting from its first state up until the state at time stamp $t$, then the edge connecting state on $\pi_i$ at time $t$ to the state on $\pi_j$ at time $t + \delta t$, followed by $\pi_j$ starting from the state at $t + \delta t$ and up until the end of it.
+\end{itemize}
+
 \end{document}
