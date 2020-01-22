@@ -20,7 +20,7 @@
 \usepackage{subcaption}
 \usepackage[dvipsnames]{xcolor}
 
-
+\DeclareMathOperator*{\argmin}{arg\,min}
 %\pdfinfo{
 %   /Author (Homer Simpson)
 %   /Title  (Robots: Our new overlords)
@@ -239,6 +239,24 @@ The remainder of this section formalizes these ideas.
 Before we can detail our algorithm, we show how \emph{experience graphs}~\cite{PCCL12} can be used in our framework.
 
 \os{FAHAD - can you sketch something here?}
+\subsubsection{Shortcut Successor}
+
+In addition to the predefined set of successors, we use a \textit{shortcut} successor~$s'_{sc}$ to quickly reach the state on the experience that is closest to the goal $g$ with respect to the heuristic function $h$. $s_{sc}$ is given by
+
+\begin{center}
+ $\argmin\limits_{s_i \in \Pi_i} h(s_i, g)$
+\end{center}
+
+We find $s_{sc}$ subject to constraint that the path from $s_{\textrm{start}}$ to $s_{sc}$ is collision free. \os{May be write this constraint in the above expression mathematically}
+
+\subsubsection{E-graph Heuristic}
+We use a simplified version of the e-graph heuristic which is faster to compute by only considering the $s_{sc}$ as the e-graph node instead of the entire path $\Pi$. For any state $s$ the heuristic is given by
+
+\begin{center}
+ $h(s,g) = \min(h(s,s_{sc}) + h(s_{sc},g), \epsilon * h(s,g))$.
+\end{center}
+
+where $\epsilon (\geq 1)$ is a penalty term that biases the search to find a path via $s_{sc}$.
 
 \subsection{Algorithmic details}
 Our algorithm starts by sampling a goal state $g_1 \in \Gfull$ and computing a root path $\Pi_1$ from $\Shome$ to $g_1$. We then associate with $\Pi_1$ all goal states $G_1 \subset \Gfull$ such that $\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$.
