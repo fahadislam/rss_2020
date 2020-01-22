@@ -1,0 +1,18 @@
+\BOOKMARK [1][]{section.1}{I Introduction}{}% 1
+\BOOKMARK [1][]{section.2}{II Related work}{}% 2
+\BOOKMARK [1][]{section.3}{III Problem definition}{}% 3
+\BOOKMARK [1][]{section.4}{IV Algorithmic framework}{}% 4
+\BOOKMARK [2][]{subsection.4.1}{IV-A Straw man approach}{section.4}% 5
+\BOOKMARK [2][]{subsection.4.2}{IV-B Algorithmic approach}{section.4}% 6
+\BOOKMARK [2][]{subsection.4.3}{IV-C Planning using experiences}{section.4}% 7
+\BOOKMARK [2][]{subsection.4.4}{IV-D Algorithmic details}{section.4}% 8
+\BOOKMARK [1][]{section.5}{V Evaluation}{}% 9
+\BOOKMARK [1][]{section.6}{VI Conclusion \046 future work}{}% 10
+\BOOKMARK [1][]{section.7}{VII Algorithm}{}% 11
+\BOOKMARK [2][]{subsection.7.1}{VII-A Problem Definition and Assumptions}{section.7}% 12
+\BOOKMARK [2][]{subsection.7.2}{VII-B Properties}{section.7}% 13
+\BOOKMARK [2][]{subsection.7.3}{VII-C Offline Motion Planner}{section.7}% 14
+\BOOKMARK [3][]{subsubsection.7.3.1}{VII-C1 State Space and Graph Construction}{subsection.7.3}% 15
+\BOOKMARK [3][]{subsubsection.7.3.2}{VII-C2 Search and Heuristic function}{subsection.7.3}% 16
+\BOOKMARK [3][]{subsubsection.7.3.3}{VII-C3 Assumptions}{subsection.7.3}% 17
+\BOOKMARK [1][]{section.8}{VIII Experiments}{}% 18

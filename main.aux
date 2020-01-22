@@ -1,0 +1,90 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{ISL19}
+\citation{menon2014motion}
+\citation{cowley2013perception}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related work}{1}{section.2}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Problem definition}{1}{section.3}}
+\newlabel{assum:1}{{{{\textbf  {A1}}}}{1}{Problem definition}{Item.1}{}}
+\newlabel{assum:2}{{{{\textbf  {A2}}}}{1}{Problem definition}{Item.2}{}}
+\newlabel{assum:3}{{{{\textbf  {A3}}}}{1}{Problem definition}{Item.3}{}}
+\newlabel{assum:4}{{{{\textbf  {A4}}}}{1}{Problem definition}{Item.4}{}}
+\newlabel{assum:5}{{{{\textbf  {A5}}}}{1}{Problem definition}{Item.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Algorithmic framework}{1}{section.4}}
+\newlabel{subsec:strawman}{{IV}{1}{Algorithmic framework}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}}Straw man approach}{1}{subsection.4.1}}
+\citation{PCCL12}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:naive1}{{1a}{2}{\relax }{figure.caption.1}{}}
+\newlabel{sub@fig:naive1}{{a}{2}{\relax }{figure.caption.1}{}}
+\newlabel{fig:naive2}{{1b}{2}{\relax }{figure.caption.1}{}}
+\newlabel{sub@fig:naive2}{{b}{2}{\relax }{figure.caption.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The two steps of the preprocessing stage of the straw man algorithm. In both figures, paths that are very similar (and their corresponding goal states) are depicted using the same color. (\subref  {fig:naive1})\nobreakspace  {}First step---the algorithm computes a path from \ensuremath  {s_{\textrm  {home}}}\xspace  to every state in \ensuremath  {G^{\textrm  {full}}}\xspace  . (\subref  {fig:naive2})\nobreakspace  {}Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. \relax }}{2}{figure.caption.1}}
+\newlabel{fig:naive}{{1}{2}{The two steps of the preprocessing stage of the straw man algorithm. In both figures, paths that are very similar (and their corresponding goal states) are depicted using the same color. (\subref {fig:naive1})~First step---the algorithm computes a path from \Shome to every state in \Gfull . (\subref {fig:naive2})~Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. \relax }{figure.caption.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}}Algorithmic approach}{2}{subsection.4.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-C}}Planning using experiences}{2}{subsection.4.3}}
+\newlabel{subsec:experience}{{\unhbox \voidb@x \hbox {IV-C}}{2}{Planning using experiences}{subsection.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}}Algorithmic details}{2}{subsection.4.4}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces \textsc  {ComputeRootPaths}($s_{\textrm  {start}}, G^{\textrm  {UNCOV}}$)\relax }}{2}{algorithm.1}}
+\newlabel{alg:step1}{{1}{2}{\textsc {ComputeRootPaths}($s_{\textrm {start}}, G^{\textrm {UNCOV}}$)\relax }{algorithm.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Evaluation}{2}{section.5}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Conclusion \& future work}{2}{section.6}}
+\newlabel{fig:crp1}{{2a}{3}{\relax }{figure.caption.2}{}}
+\newlabel{sub@fig:crp1}{{a}{3}{\relax }{figure.caption.2}{}}
+\newlabel{fig:crp2}{{2b}{3}{\relax }{figure.caption.2}{}}
+\newlabel{sub@fig:crp2}{{b}{3}{\relax }{figure.caption.2}{}}
+\newlabel{fig:crp3}{{2c}{3}{\relax }{figure.caption.2}{}}
+\newlabel{sub@fig:crp3}{{c}{3}{\relax }{figure.caption.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces First step of the preprocessing stage. (\subref  {fig:crp1})\nobreakspace  {}A goal state $g_1$ is sampled and the root path $\Pi _1$ is computed between \ensuremath  {s_{\textrm  {home}}}\xspace  and $g_1$. (\subref  {fig:crp2})\nobreakspace  {}The set $G_1 \subset \ensuremath  {G^{\textrm  {full}}}\xspace  $ of all states that can use $\Pi _1$ as an experience is computed and associated with $\Pi _1$. (\subref  {fig:crp3})\nobreakspace  {}The goal region covered by four root paths from \ensuremath  {s_{\textrm  {home}}}\xspace  after the first step of the preprocessing stage terminates. \relax }}{3}{figure.caption.2}}
+\newlabel{fig:crp}{{2}{3}{First step of the preprocessing stage. (\subref {fig:crp1})~A goal state $g_1$ is sampled and the root path $\Pi _1$ is computed between \Shome and $g_1$. (\subref {fig:crp2})~The set $G_1 \subset \Gfull $ of all states that can use $\Pi _1$ as an experience is computed and associated with $\Pi _1$. (\subref {fig:crp3})~The goal region covered by four root paths from \Shome after the first step of the preprocessing stage terminates. \relax }{figure.caption.2}{}}
+\newlabel{fig:pl1}{{3a}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl1}{{a}{3}{\relax }{figure.caption.3}{}}
+\newlabel{fig:pl2}{{3b}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl2}{{b}{3}{\relax }{figure.caption.3}{}}
+\newlabel{fig:pl3}{{3c}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl3}{{c}{3}{\relax }{figure.caption.3}{}}
+\newlabel{fig:pl4}{{3d}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl4}{{d}{3}{\relax }{figure.caption.3}{}}
+\newlabel{fig:pl5}{{3e}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl5}{{e}{3}{\relax }{figure.caption.3}{}}
+\newlabel{fig:pl6}{{3f}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl6}{{f}{3}{\relax }{figure.caption.3}{}}
+\newlabel{fig:pl7}{{3g}{3}{\relax }{figure.caption.3}{}}
+\newlabel{sub@fig:pl7}{{g}{3}{\relax }{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Preprocess loop (\subref  {fig:pl1})\nobreakspace  {}text. (\subref  {fig:pl2})\nobreakspace  {}text. (\subref  {fig:pl3})\nobreakspace  {}text. \relax }}{3}{figure.caption.3}}
+\newlabel{fig:crp}{{3}{3}{Preprocess loop (\subref {fig:pl1})~text. (\subref {fig:pl2})~text. (\subref {fig:pl3})~text. \relax }{figure.caption.3}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Algorithm}{3}{section.7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VII-A}}Problem Definition and Assumptions}{3}{subsection.7.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VII-B}}Properties}{3}{subsection.7.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {VII-C}}Offline Motion Planner}{3}{subsection.7.3}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {VII-C}1}State Space and Graph Construction}{4}{subsubsection.7.3.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {VII-C}2}Search and Heuristic function}{4}{subsubsection.7.3.2}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {VII-C}3}Assumptions}{4}{subsubsection.7.3.3}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces \textsc  {PreprocessMain()}\relax }}{4}{algorithm.2}}
+\newlabel{alg:1}{{2}{4}{\textsc {PreprocessMain()}\relax }{algorithm.2}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces \textsc  {Preprocess}($s_{\textrm  {start}},G^{\textrm  {UNCOV}},G^{\textrm  {COV}}$)\relax }}{4}{algorithm.3}}
+\newlabel{alg:2}{{3}{4}{\textsc {Preprocess}($s_{\textrm {start}},G^{\textrm {UNCOV}},G^{\textrm {COV}}$)\relax }{algorithm.3}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces \textsc  {Query}($g, \pi _{\textrm  {curr}},s_{\textrm  {start}}$)\relax }}{4}{algorithm.4}}
+\newlabel{alg:3}{{4}{4}{\textsc {Query}($g, \pi _{\textrm {curr}},s_{\textrm {start}}$)\relax }{algorithm.4}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces \textsc  {ComputeRootPaths$\&$GoalRegions}($s_{\textrm  {start}}, G^{\textrm  {UNCOV}}$)\relax }}{4}{algorithm.5}}
+\newlabel{alg:4}{{5}{4}{\textsc {ComputeRootPaths$\&$GoalRegions}($s_{\textrm {start}}, G^{\textrm {UNCOV}}$)\relax }{algorithm.5}{}}
+\bibstyle{plainnat}
+\bibdata{references}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Experiments}{5}{section.8}}
