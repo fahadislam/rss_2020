@@ -1,197 +1,400 @@
-\documentclass[letterpaper]{article} % DO NOT CHANGE THIS
-\usepackage{helvet} % DO NOT CHANGE THIS
-\usepackage{courier}  % DO NOT CHANGE THIS
-\usepackage[hyphens]{url}  % DO NOT CHANGE THIS
-\usepackage{graphicx} % DO NOT CHANGE THIS
-\urlstyle{rm} % DO NOT CHANGE THIS
-\def\UrlFont{\rm}  % DO NOT CHANGE THIS
+\documentclass[conference]{IEEEtran}
+\usepackage{times}
+\usepackage{graphicx}
 
-%% additional packages
-\usepackage{amsmath,amssymb,amsfonts}
+% numbers option provides compact numerical references in the text. 
+\usepackage[numbers]{natbib}
+\usepackage{multicol}
+\usepackage[bookmarks=true]{hyperref}
+
+\usepackage{comment}
 \usepackage{xspace}
+\let\labelindent\relax %fixes error in enumitem created due to legacy reasons
 \usepackage{enumitem}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage[noend]{algpseudocode}
-% \usepackage{algpseudocode}
 \usepackage{parskip}
-\usepackage{amsthm}
-\usepackage{subfig}
+%\usepackage{subfig}
+\usepackage{subcaption}
 \usepackage[dvipsnames]{xcolor}
-%%%%%%%%%%%%%%%%
-% \usepackage{tikz}
-% \usetikzlibrary{fit,calc}
-% %define a marking command
-% \newcommand*{\tikzmk}[1]{\tikz[remember picture,overlay,] \node (#1) {};\ignorespaces}
-% %define a boxing command, argument = colour of box
-% \newcommand{\boxit}[1]{\tikz[remember picture,overlay]{\node[yshift=3pt,fill=#1,opacity=.25,fit={(A)($(B)+(.95\linewidth,.8\baselineskip)$)}] {};}\ignorespaces}
-% %define some colours according to algorithm parts (or any other method you like)
-% \colorlet{pink}{red!40}
-% \colorlet{blue}{cyan!60}
-%%%%%%%%
-
-\frenchspacing  % DO NOT CHANGE THIS
-\setlength{\pdfpagewidth}{8.5in}  % DO NOT CHANGE THIS
-\setlength{\pdfpageheight}{11in}  % DO NOT CHANGE THIS
 
 
-% \title{Zero time replanning}
+%\pdfinfo{
+%   /Author (Homer Simpson)
+%   /Title  (Robots: Our new overlords)
+%   /CreationDate (D:20101201120000)
+%   /Subject (Robots)
+%   /Keywords (Robots;Overlords)
+%}
 
-% \author{Fahad Islam}
 
-% \date{\today}
+\graphicspath{
+	{./figs/}
+}
+
+\hypersetup{letterpaper,bookmarksopen,bookmarksnumbered,
+pdfpagemode=UseOutlines,
+colorlinks=true,
+linkcolor=blue,
+anchorcolor=blue,
+citecolor=blue,
+filecolor=blue,
+menucolor=blue,
+urlcolor=blue
+}
+
+\input{macros.tex}
 
 \begin{document}
-% \maketitle
 
-\begin{algorithm}
-\caption{\textsc{PreprocessMain()}}\label{alg:1}
-% Precompute trunks $\{\Pi_{G^{\textrm{full}}}\}$ from $s_{\textrm{home}}$ that cover $G^{\textrm{full}}$
-\hspace*{\algorithmicindent} \textbf{Inputs} $s_{\textrm{home}}, G^{\textrm{full}}$ \\
-% \hspace*{\algorithmicindent} \textbf{Output} 
-\begin{algorithmic}[1]
-% \State $\Psi_{\textrm{home}}, G'^{\textrm{full}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{home}},G^{\textrm{full}}$)
-\State \textsc{Preprocess}($s_{\textrm{home}},G^{\textrm{full}},\Phi$)
-\end{algorithmic}
-\end{algorithm}
+% paper title
+\title{Real time planning in structured environments via efficient path compression}
 
-\begin{algorithm}
-\caption{\textsc{Preprocess}($s_{\textrm{start}},G^{\textrm{UNCOV}},G^{\textrm{COV}}$)}\label{alg:2}
-\begin{algorithmic}[1]
-\State $\Psi_{\textrm{work}}, G'^{\textrm{UNCOV}}_{\textrm{work}} \leftarrow$ \textsc{ComputeRootPaths\&GoalRegions}($s_{\textrm{start}},G^{\textrm{UNCOV}}$)
+% You will get a Paper-ID when submitting a pdf file to the conference system
+\author{Author Names Omitted for Anonymous Review. Paper-ID [add your ID here]}
 
-\If {$s_{\textrm{start}} = s_{\textrm{home}}$}
-    \State $\Psi_{\textrm{home}} = \Psi_{\textrm{work}}$
-\EndIf
-% \State $G'^{\textrm{COV}} \leftarrow G'^{\textrm{COV}} \bigcup G^{\textrm{COV}}$
-\State $G'^{\textrm{COV}} \leftarrow G^{\textrm{COV}} \cup (G^{\textrm{UNCOV}} - G'^{\textrm{UNCOV}}_{\textrm{work}})$
-\If{$t(s_{\textrm{start}}) \geq t_{rc}$}
-    \State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
-\EndIf
-\For {\textbf{each} $(\Pi_{G_i}, G_i) \in \Psi_{\textrm{work}}$}
-% \For {$i \leftarrow$ 1 to $|\{\Pi_{\textrm{work}}\}|$}
-    % \State $\Pi_{G_i}, G_i \leftarrow$ \textsc{GetRootPathAndGoalRegion}($s_{\textrm{start}},i$)
-    \State $t = t_{rc}$
-    \State $G_i^{\textrm{uncov}} \leftarrow G'^{\textrm{COV}} - G_i$
-    \State $G_i^{\textrm{cov}} \leftarrow G_i$
+%\author{\authorblockN{Michael Shell}
+%\authorblockA{School of Electrical and\\Computer Engineering\\
+%Georgia Institute of Technology\\
+%Atlanta, Georgia 30332--0250\\
+%Email: mshell@ece.gatech.edu}
+%\and
+%\authorblockN{Homer Simpson}
+%\authorblockA{Twentieth Century Fox\\
+%Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\and
+%\authorblockN{James Kirk\\ and Montgomery Scott}
+%\authorblockA{Starfleet Academy\\
+%San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212\\
+%Fax: (888) 555--1212}}
 
-    % {\color{BrickRed}
-    % \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} - G_i$
-    % \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_i$
-    % }
+
+% avoiding spaces at the end of the author lines is not a problem with
+% conference papers because we don't use \thanks or \IEEEmembership
+
+
+% for over three affiliations, or if they all won't fit within the width
+% of the page, use this alternative format:
+% 
+%\author{\authorblockN{Michael Shell\authorrefmark{1},
+%Homer Simpson\authorrefmark{2},
+%James Kirk\authorrefmark{3}, 
+%Montgomery Scott\authorrefmark{3} and
+%Eldon Tyrell\authorrefmark{4}}
+%\authorblockA{\authorrefmark{1}School of Electrical and Computer Engineering\\
+%Georgia Institute of Technology,
+%Atlanta, Georgia 30332--0250\\ Email: mshell@ece.gatech.edu}
+%\authorblockA{\authorrefmark{2}Twentieth Century Fox, Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\authorblockA{\authorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212, Fax: (888) 555--1212}
+%\authorblockA{\authorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+
+
+\maketitle
+
+\begin{abstract}
+The abstract goes here.
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+write intro
+%1. What is the problem?
+%2. Why is it relevant?
+%3. Why is it hard?
+%4. What have others done?
+%5. What's missing?
+%6. What is our ONE key insight?
+%7. How do we compare against the state of the art?
+%8. What are our contributions?
+%9. What are our limitations?
+
+\section{Related work}
+Include ICAPS paper~\cite{ISL19}
+
+Relevant papers from our lab:
+~\cite{menon2014motion}
+~\cite{cowley2013perception}
+
+
+\section{Problem definition}
+\os{talk about states vs. configurations}
+
+Let $\Gfull$ be a discrete set of configurations corresponding to the set of initial object poses on the conveyor belt that the robot can perceive when the object comes in its field of view. 
+%
+In addition, let \Shome be a robot configuration corresponding to the robot's initial pose before object grasping is performed.
+%
+The objective, following the set of assumptions we will shortly state, is to enable planning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound regardless of the current state of the system.
+More specifically, the perception system is setup such that it sends updated pose estimates on the fly as the object moves along the conveyor belt and as the robot approaches the object.   
+
+%Given any current state of the robot during execution $s_{\textrm{start}}$, the planner should be able to replan from $s_{\textrm{start}}$ to any subsequent goal $g_{\textrm{next}}$.
+
+Before stating our assumptions about the system, let us introduce several definitions and notations:
+\begin{definition}
+    A goal state $g \in \Gfull$ is said to be \emph{reachable} from a state $s$ if there exists a path from $s$ to $g$ and it can be computed in finite time.
+\end{definition}
+
+Given a state $s$ we denote the set of all goal states that are reachable from $s$ as $G^{\rm reach}(s)$ and we say that $G^{\rm reach}(s)$ is \emph{reachable} from $s$.
+
+%\begin{definition}
+%    A goal region $G \subseteq \Gfull$ is said to be \emph{reachable} from a state $s$ if any state $g \in G$ is reachable from $s$.
+%\end{definition}
+
+We make the following assumptions about the system.
+\begin{enumerate}[label={\textbf{A\arabic*}},leftmargin=0.75cm]
+    \item \label{assum:1} The goal set \Gfull is reachable from the start state~\Shome. Namely,  $G^{\rm reach}(\Shome) = \Gfull$.
     
-    \While{$t \geq t(s_{\textrm{start}})$}
-        \State $s \leftarrow$ \textsc{GetState($\Pi_{G_i}, t$)}
-        %%%%%%% LATCHING BEGIN
-      % {\color{blue}
-       \For {\textbf{each} $(\Pi_{G_j}, G_j) \in \Psi_{\textrm{home}}$}
-            \If{\textsc{CheckSnap}($s,\Pi_{G_j}$)}
-                \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} - G_j$
-                \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_j$
+    \item \label{assum:2} Given a path 
+    $\Pi = \{s_0, \ldots, s_k \}$ 
+    s.t. $s_0 = \Shome$ and $s_k \in \Gfull$, 
+    we have that $G^{\rm reach}(s_{i+1}) \subset G^{\rm reach}(s_{i})$.
+    Namely, the reachable set of goals for a state on the path is a subset of the reachable set of every other state on that path that exists before it.
+    
+    \item \label{assum:3} \Gfull would accommodate for an error $\epsilon$ in the initial pose estimate $g_{\textrm{init}}$ of the perception system. Each subsequent estimate $g_{\textrm{next}}$ will be within the $\epsilon$ window around $g_{\textrm{init}}$ (in retrospect because the conveyor is moving).
+    \os{what does this mean? how is this used?}
+    
+    \item \label{assum:4} There exists a replan cutoff time \Trc from when the robot starts moving, after which the perception system does not update the object's pose.
+    
+    \item \label{assum:5} If the robot starts moving at $t = 0$ then for any time $t < \Trc$, the environment is static. Namely, objects on the conveyor belt cannot collide with the robot during that time.
+\end{enumerate}
+
+Assumptions~\ref{assum:1}-\ref{assum:2} correspond to properties of the environment \emph{without} taking the objects on the conveyor belt into account 
+while
+Assumptions~\ref{assum:3}-\ref{assum:5} correspond to properties of the environment that account for the perception system and the objects on the conveyor belt.
+
+
+\section{Algorithmic framework}
+\label{subsec:strawman}
+Our approach for bounded-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal state (under Assumptions~\ref{assum:1}-\ref{assum:5}). 
+%
+Before we describe our approach, we start by describing a \naive method that solves the aforementioned problem but requires a prohibitive amount of memory.
+%
+This can be seen as a warmup before describing our algorithm which exhibits the same traits but doing so in a memory-efficient manner (Sec.~\ref{}).
+
+\subsection{Straw man approach}
+We divide the preprocessing stage into two steps.
+In the first step, we compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$ (such a path exists following \ref{assum:1}).
+This allows us to start executing a path once the perception system gives its initial pose estimate.
+However, we need to allow for updated pose estimations while executing a path $\Pi_g$.
+%
+Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time \Trc.
+Thus we discretize each path such that consecutive states along the path are no more than $\delta _t$ time apart. This will allow the system to start executing a new path within $t_{\textrm{bound}} + \delta_t$ after a new pose estimation is obtained from the perception system.
+%
+Finally, in the second step of the preprocessing stage, for each path we compute a new path to each goal state for every state along the path that is less then \Trc time from \Shome.
+For a visualization, see Fig.~\ref{fig:naive}.
+%
+The outcome of the preprocessing stage is a set of precomputed collision-free paths starting at states that are at most $\delta_t$ from \Shome and end at states goal states.
+The paths are stored in a lookup table that can be queried in $O(1)$ time.
+
+In the query stage we obtain an estimation $g$ of the goal pose by the perception system. 
+The algorithm then retrieves the path $\Pi(\Shome,g)$ from \Shome to $g$ and the robot starts executing $\Pi(\Shome,g)$.
+%
+For every new estimation $g'$ of the goal pose by the perception system, the algorithm retrieves the path $\Pi(s,g')$ from the next state $s$ along $\Pi(\Shome,g)$ to $g'$ and the robot will then execute $\Pi(s,g')$ once it reaches $s$.
+
+\os{discuss guarantees this approach yields}
+
+\begin{figure}[t]
+    \centering
+    \begin{subfigure}{.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{naive1}
+        \caption{}
+        \label{fig:naive1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{naive2}
+        \caption{}
+        \label{fig:naive2}
+    \end{subfigure}
+    \caption{The two steps of the preprocessing stage of the straw man algorithm. In both figures, paths that are very similar (and their corresponding goal states) are depicted using the same color.
+    (\subref{fig:naive1})~First step---the algorithm computes a path from \Shome to every state in \Gfull.
+    %
+    (\subref{fig:naive2})~Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. }
+    \label{fig:naive}
+\end{figure}
+
+\subsection{Algorithmic approach}
+While the straw man algorithm presented in Sec.~\ref{subsec:strawman} allows for planning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound, its memory footprint is prohibitively large.
+%
+We suggest to reduce the memory footprint by building on the observation that many paths to close-by goals traverse very similar parts of the configurations space (see Fig.~\ref{fig:naive}).
+
+Similar to the straw man algorithm, our preprocessing stage runs in two steps.
+In the first step we we compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$ (such a path exists following \ref{assum:1}). However, this is done by computing a set of so-called ``root paths'' $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to a subset of goals in \Gfull. 
+As we will see these paths will allow to efficiently compute paths to every goal state in the query stage and the system only needs to explicitly store these root paths in memory (and not a path to every goal state as in the straw man algorithm).
+%
+In the second step of the preprocessing stage, the algorithm computes for each root path a new path to each goal state for every state along the path. However, this is done by attempting to re-use previously computed root paths which allows for a very low memory footprint.
+%
+The remainder of this section formalizes these ideas.
+
+\subsection{Planning using experiences}
+\label{subsec:experience}
+Before we can detail our algorithm, we show how \emph{experience graphs}~\cite{PCCL12} can be used in our framework.
+
+\os{FAHAD - can you sketch something here?}
+
+\subsection{Algorithmic details}
+Our algorithm starts by sampling a goal state $g_1 \in \Gfull$ and computing a root path $\Pi_1$ from $\Shome$ to $g_1$. We then associate with $\Pi_1$ all goal states $G_1 \subset \Gfull$ such that $\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$.
+%
+We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus G_1$.
+At the end of this step, we obtain a set of root paths. Each root path $\Pi_i$ is associated with a goal set $G_i \subseteq \Gfull$ such that $\Pi_i$ can be used as an experience in reaching any state in $g_i' \in G_i$.
+\os{there is a lot of redundant text here. perhaps this can be compressed by introducing notation in Sec~\ref{subsec:experience} }.
+%
+For a visualization of this step, see Fig.~\ref{fig:crp}.
+For pseudocode see Alg.~\ref{alg:step1}.
+\os{I would opt for putting the pseudo code in the supplementary material if we are tight on space.}
+
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}{.3\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{2_compute_root_paths_1}
+        \caption{}
+        \label{fig:crp1}
+    \end{subfigure}
+    \hspace{2mm}
+    \begin{subfigure}{0.3\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{2_compute_root_paths_2}
+        \caption{}
+        \label{fig:crp2}
+    \end{subfigure}
+    \hspace{2mm}
+    \begin{subfigure}{0.3\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{2_compute_root_paths_3}
+        \caption{}
+        \label{fig:crp3}
+    \end{subfigure}
+    \caption{First step of the preprocessing stage.
+    (\subref{fig:crp1})~A goal state $g_1$ is sampled and the root path $\Pi_1$ is computed between \Shome and $g_1$.
+    %
+    (\subref{fig:crp2})~The set $G_1 \subset \Gfull$ of all states that can use $\Pi_1$ as an experience is computed and associated with $\Pi_1$.
+    %
+    (\subref{fig:crp3})~The goal region covered by four root paths from \Shome after the first step of the preprocessing stage terminates.
+    }
+    \label{fig:crp}
+\end{figure*}
+
+\begin{algorithm}
+\caption{\textsc{ComputeRootPaths}($s_{\textrm{start}}, G^{\textrm{UNCOV}}$)}
+\label{alg:step1}
+\begin{algorithmic}[1]
+\State $\Psi \leftarrow \emptyset$   \Comment{A list of pairs ($\Pi, G)$)}
+\State $G'^{\textrm{UNCOV}} \leftarrow \emptyset$; \hspace{3mm}
+       $G'^{\textrm{COV}} \leftarrow \emptyset$; \hspace{3mm}
+       $i = 0$
+\While{$G^{\textrm{UNCOV}} \neq \emptyset$}
+        \Comment{Runs until all uncovered points are considered}
+    \State $g_i \leftarrow$\textsc{Sample}($G^{\textrm{UNCOV}}$)
+    \State $G^{\textrm{UNCOV}}\leftarrow G^{\textrm{UNCOV}} \setminus \{g_i\}$
+    
+    \State $\Pi_i \leftarrow$ \textsc{PlanRootPath}($s_{\textrm{start}}, g_i$)
+    \If {$\Pi_i = \emptyset$}  \Comment{path does not exist}
+        \State $G'^{\textrm{UNCOV}} \leftarrow G'^{\textrm{UNCOV}} \cup \{g_i\}$
+    \Else
+        \State $G_i \leftarrow \emptyset$
+        \For {\textbf{each} $g_j \in G^{\textrm{UNCOV}}$}
+            \State $\pi_j \leftarrow$\textsc{PlanUsingRootPath}($s_{\textrm{start}},g_j,\Pi_i$)
+            \If {$\pi_j \neq \emptyset$} \Comment{planner succeeded}
+                \State $G_i \leftarrow G_i \cup \{g_j\}$
+                \State $G^{\textrm{UNCOV}} \leftarrow G^{\textrm{UNCOV}} \setminus \{g_j\}$
             \EndIf
         \EndFor
-        % }
-        %%%%%%%%% LATCHING END
-        \If{$G_i^{\textrm{uncov}} = \Phi$}
-            \State \textbf{break}
-        \EndIf
-        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)
-        \If{$G_i^{\textrm{uncov}} = \Phi$}
-            \State \textbf{break}
-        \EndIf
-        \State $t = t - \delta t$
-    \EndWhile
-    % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
-\EndFor
-\State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
-
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{\textsc{Query}($g, \pi_{\textrm{curr}},s_{\textrm{start}}$)}\label{alg:3}  
-\begin{algorithmic}[1]
-    % {\color{BrickRed}
-    \State $\Pi_{\textrm{curr}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{start}},g$)
-        % \State \textbf{return} $\pi_{\textrm{curr}}$
-    \If{$\Pi_{\textrm{curr}} \neq \Phi$}
-        \State $\pi \leftarrow$ \textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g,\Pi_{\textrm{curr}}$)
-        \State \textbf{return} $\pi$
+        \State $\Psi \leftarrow \Psi \cup \{ (\Pi_i, G_i)\}$
+        \Comment{Insert $(\Pi_i, G_i)$ to $\Psi$}
+        \State $i \leftarrow i + 1$
     \EndIf
-    % }
-
-\State $t = t_{rc}$
-\While{$t \geq t_{\textrm{curr}}$}
-    \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
-    \State $\Pi_{\textrm{next}} \leftarrow$  \textsc{LookupRootPath}($s,g$)
-    \If{$\Pi_{\textrm{next}} \neq \Phi$}
-        \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g,\Pi_{\textrm{next}}$)
-        \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}},t$)
-        \State \textbf{return} $\pi$
-    \EndIf
-%%%%%%%%%%%%%%%%LATCHING 
-    {\color{blue}
-    \State $\Pi_{\textrm{home}} \leftarrow$ \textsc{LookupRootPath}($s_{\textrm{home}},g$)
-    \If{$\Pi_{\textrm{home}} \neq \Phi$}
-        \If{\textsc{CheckSnap}($s,\Pi_{\textrm{home}}$)}
-            \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g,\Pi_{\textrm{home}}$)
-            \State $\pi \leftarrow$ \textsc{MergePathsWithSnap}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, t$)
-            \State \textbf{return} $\pi$
-        \EndIf
-    \EndIf
-    }
-%%%%%%%%%%%
-    \State $t = t - \delta t$
-\EndWhile
-\State \textbf{return failure}
-\end{algorithmic}
-\end{algorithm}
-
-\begin{algorithm}
-\caption{\textsc{ComputeRootPaths$\&$GoalRegions}($s_{\textrm{start}}, G^{\textrm{UNCOV}}$)}\label{alg:4}
-\begin{algorithmic}[1]
-\State $\Psi \leftarrow \Phi$   \Comment{A list of pairs ($\Pi, G)$)}
-\State $G'^{\textrm{UNCOV}} \leftarrow \Phi$
-\State $i = 0$
-\While{true}    \Comment{Runs until all $g_i \in G^{\textrm{UNCOV}}$ are sampled and/or covered}
-    \State $g_i \leftarrow$\textsc{SampleRandomUncoveredGoalInRegion}($G^{\textrm{UNCOV}}$)
-    \If{$g_i = \O$}
-        \State \textbf{break}
-    \EndIf
-    \State $\Pi_i \leftarrow$ \textsc{PlanRootPath}($s_{\textrm{start}}, g_i$)
-    \If {$\Pi_i = \Phi$}  \Comment{i.e. path does not exist}
-        \State $G'^{\textrm{UNCOV}} \leftarrow g_j$
-    \EndIf
-    \State $G_i \leftarrow \Phi$
-    \For {\textbf{each} $g_j \in G^{\textrm{UNCOV}}$}
-        \If {$g_j$ is \emph{covered}}
-            \State \textbf{continue}
-        \EndIf
-        \State $\pi_j \leftarrow$\textsc{PlanPathUsingRootPath}($s_{\textrm{start}},g_j,\Pi_i$)
-        \If {$\pi_j \neq \Phi$} \Comment{i.e. planner succeeded}
-            \State Insert $g_j$ in $G_i$
-            \State Mark $g_j$ as \emph{covered}
-        \EndIf
-        
-    \EndFor
-    \State Insert pair $(\Pi_i, G_i)$ in $\Psi$
-    \State $i = i + 1$
-
 \EndWhile
 \State \textbf{return} $\Psi, G'^{\textrm{UNCOV}}$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection*{Undefined Functions}
-\begin{itemize}
-  \item \textsc{GetState}($\pi,t$) returns the state on path $\pi$ with timestamp $t$.
-  \item \textsc{CheckSnap}($s,\Pi$) checks if the robot can snap from state $s$ onto the the path $\Pi$ at the next time stamp of what $s$ is at. It checks if the motion is valid w.r.t. kinematic, dynamic and collision constraints.
-  \item \textsc{LookupRootPath}($s,g$) queries a stored lookup table that maps a start and goal pair to a root path (that could be used to plan path in bounded time).
-  \item \textsc{SampleRandomUncoveredGoalInRegion}($G$) returns a goal in $G$ which is never sampled before and which is still uncovered. If no such goal exists it returns $\O$.
-  \item \textsc{PlanRootPath}($s,g$) uses a search-based planner with motion primitives to plan a path from $s$ to $g$ (details will be in the text).
-  \item \textsc{PlanUsingRootPath}($s,g,\Pi$) uses the e-graph planner to plan a path from $s$ to $g$ using the root path $\Pi$ (details will be in the text).
-  \item \textsc{MergePaths}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments, first being $\pi_i$ starting from its first state up until the state at time stamp $t$, and the second being $\pi_j$ starting from the state at $t$ and up until the end of it.
-  \item \textsc{MergePathsWithSnap}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments with a snapping edge in between, first path being $\pi_i$ starting from its first state up until the state at time stamp $t$, then the edge connecting state on $\pi_i$ at time $t$ to the state on $\pi_j$ at time $t + \delta t$, followed by $\pi_j$ starting from the state at $t + \delta t$ and up until the end of it.
-\end{itemize}
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}{.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_1}
+        \caption{}
+        \label{fig:pl1}
+    \end{subfigure}
+    \hspace{1mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_2}
+        \caption{}
+        \label{fig:pl2}
+    \end{subfigure}
+    \hspace{1mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_3}
+        \caption{}
+        \label{fig:pl3}
+    \end{subfigure}
+    %
+    \hspace{1mm}
+    \begin{subfigure}{.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_4}
+        \caption{}
+        \label{fig:pl4}
+    \end{subfigure}
+    %\hspace{2mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_5}
+        \caption{}
+        \label{fig:pl5}
+    \end{subfigure}
+    \hspace{1mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_6}
+        \caption{}
+        \label{fig:pl6}
+    \end{subfigure}
+    \hspace{1mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{3_preprocess_loop_7}
+        \caption{}
+        \label{fig:pl7}
+    \end{subfigure}
+    \caption{Preprocess loop
+    (\subref{fig:pl1})~text.
+    %
+    (\subref{fig:pl2})~text.
+    %
+    (\subref{fig:pl3})~text.
+    }
+    \label{fig:crp}
+\end{figure*}
+
+\section{Evaluation}
+
+\section{Conclusion \& future work}
+
+\section*{Acknowledgments}
+
+\vfill
+\pagebreak
+\input{old.tex}
+
+%% Use plainnat to work nicely with natbib. 
+
+\bibliographystyle{plainnat}
+\bibliography{references}
 
 \end{document}
+
+
