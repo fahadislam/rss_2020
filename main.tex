@@ -50,7 +50,7 @@ urlcolor=blue
 \begin{document}
 
 % paper title
-\title{Real time planning in structured environments via efficient path compression}
+\title{Provably Constant-time Planning and Re-planning for Grasping Objects off a Conveyor}
 
 % You will get a Paper-ID when submitting a pdf file to the conference system
 \author{Author Names Omitted for Anonymous Review. Paper-ID [add your ID here]}
@@ -131,17 +131,26 @@ Let $\Gfull$ be a discrete set of configurations corresponding to the set of ini
 %
 In addition, let \Shome be a robot configuration corresponding to the robot's initial pose before object grasping is performed.
 %
-The objective, following the set of assumptions we will shortly state, is to enable planning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound regardless of the current state of the system.
+Roughly speaking, the objective, following the set of assumptions we will shortly state, is to enable planning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound regardless of the current state of the system.
 More specifically, the perception system is setup such that it sends updated pose estimates on the fly as the object moves along the conveyor belt and as the robot approaches the object.   
 
-%Given any current state of the robot during execution $s_{\textrm{start}}$, the planner should be able to replan from $s_{\textrm{start}}$ to any subsequent goal $g_{\textrm{next}}$.
+To formalize this notion, let us introduce the notion of a \emph{covered} state:
+\begin{definition}
+    A goal state $g \in \Gfull$ is said to be \emph{covered} by a state $s$ if 
+    the system can plan a path from $s$ to $g$ within time~\Tbound.
+\end{definition}
 
-Before stating our assumptions about the system, let us introduce several definitions and notations:
+Thus, we wish to compute a system such that
+for any state $s$ that the system can be before time \Trc, every goal $g \in \Gfull$ is covered by $s$.
+
+We are now ready to state the assumptions for which we can solve the problem defined.
+
 \begin{definition}
     A goal state $g \in \Gfull$ is said to be \emph{reachable} from a state $s$ if there exists a path from $s$ to $g$ and it can be computed in finite time.
 \end{definition}
 
 Given a state $s$ we denote the set of all goal states that are reachable from $s$ as $G^{\rm reach}(s)$ and we say that $G^{\rm reach}(s)$ is \emph{reachable} from $s$.
+
 
 %\begin{definition}
 %    A goal region $G \subseteq \Gfull$ is said to be \emph{reachable} from a state $s$ if any state $g \in G$ is reachable from $s$.
@@ -156,6 +165,7 @@ We make the following assumptions about the system.
     s.t. $s_0 = \Shome$ and $s_k \in \Gfull$, 
     we have that $G^{\rm reach}(s_{i+1}) \subset G^{\rm reach}(s_{i})$.
     Namely, the reachable set of goals for a state on the path is a subset of the reachable set of every other state on that path that exists before it.
+    \os{Oren - Didn't we agree that this is not an assumption but a property?}
     
     \item \label{assum:3} \Gfull would accommodate for an error $\epsilon$ in the initial pose estimate $g_{\textrm{init}}$ of the perception system. Each subsequent estimate $g_{\textrm{next}}$ will be within the $\epsilon$ window around $g_{\textrm{init}}$ (in retrospect because the conveyor is moving).
     \os{what does this mean? how is this used?}
@@ -181,32 +191,33 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
 \subsection{Straw man approach}
 We divide the preprocessing stage into two steps.
 In the first step, we compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$ (such a path exists following \ref{assum:1}).
-This allows us to start executing a path once the perception system gives its initial pose estimate.
-However, we need to allow for updated pose estimations while executing a path $\Pi_g$.
-%
-Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time \Trc.
-Thus we discretize each path such that consecutive states along the path are no more than $\delta _t$ time apart. This will allow the system to start executing a new path within $t_{\textrm{bound}} + \delta_t$ after a new pose estimation is obtained from the perception system.
-%
+Thus all goal states are covered by \Shome and this allows us to start executing a path once the perception system gives its initial pose estimate.
+However, we need to allow for updated pose estimations while executing a path $\Pi_g$. 
 
-In the second step of the preprocessing stage, for every state that is less then \Trc time from \Shome along each path $\Pi$, we compute a new path to all goal states.
+%
+Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time~\Trc.
+Thus we discretize each path such that consecutive states along the path are no more than $\delta _t$ time apart. As we will see, this will allow the system to start executing a new path within $\Tbound + \delta_t$ after a new pose estimation is obtained from the perception system.
+%
+We call all states that are less than \Trc time from \Shome \emph{replanable states}.
+
+
+In the second step of the preprocessing stage, for every replanable state along each path $\Pi$, we compute a new path to all goal states.
 For a visualization, see Fig.~\ref{fig:naive}.
 %
-This will allow to immediately start executing a new path once the goal location is updated by the perception system.
+This will ensure that all goal states are covered by the replanabale states that were introduced in the first step of the preprocessing stage. Namely, it will allow to immediately start executing a new path once the goal location is updated by the perception system.
 %
 Unfortunately, the perception system may update the goal location more than once. Thus, this process needs to be performed recursively for the new paths as well.
 
 
-%
-The outcome of the preprocessing stage is a set of precomputed collision-free paths starting at states that are at most $\delta_t$ from \Shome and end at states goal states.
-The paths are stored in a lookup table that can be queried in $O(1)$ time.
+The outcome of the preprocessing stage is a set of precomputed collision-free paths starting at states that are at most $\delta_t$ from \Shome \os{shouldn't it be $s_{\textrm{start}}$?} and end at goal states.
+The paths are stored in a lookup table that can be queried in $O(1) < \Tbound$ time.
 
 In the query stage we obtain an estimation $g_1$ of the goal pose by the perception system. 
-The algorithm then retrieves the path $\Pi_1(\Shome,g_1)$ from \Shome to $g_1$ and the robot starts executing $\Pi_1(\Shome,g_1)$.
+The algorithm then retrieves the path~$\Pi_1(\Shome,g_1)$ from~\Shome to~$g_1$ and the robot starts executing~$\Pi_1(\Shome,g_1)$.
 %
-For every new estimation $g_i$ of the goal pose by the perception system, the algorithm retrieves the path $\Pi_i(s,g_i)$ from the next state $s$ along $\Pi_{i-1}(\Shome,g_{i-1})$ to $g_{i}$ and the robot will then execute $\Pi_i(s,g_i)$ once it reaches~$s$.
+For every new estimation $g_i$ of the goal pose by the perception system that is obtained while the system is executing path $\Pi_{i-1}(s,g_{i-1})$, the algorithm retrieves from the lookup table the path $\Pi_i(s',g_i)$ from the next state~$s'$ along $\Pi_{i-1}(s,g_{i-1})$ and the robot will then start executing~$\Pi_i(s,g_i)$ once it reaches~$s'$.
 
-\os{discuss guarantees this approach yields}
-
+Clearly, every state is covered by this brute-force approach, however it requires a massive amount of memory.
 Let $n_{\rm goal} = \vert \Gfull \vert$ be the number of goal states and
 $k$ be the number of states between \Shome and the state that is \Trc time away.
 This approach requires storing $O(n_{\rm goal}^k)$ paths which is clearly infeasible.
@@ -246,9 +257,11 @@ Similar to the straw man algorithm, our preprocessing stage runs in two steps.
 In the first step we we compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$ (such a path exists following \ref{assum:1}). However, this is done by computing a set of so-called ``root paths'' $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to a subset of goals in \Gfull. 
 As we will see, these paths will allow to efficiently compute paths to every goal state in the query stage and the system only needs to explicitly store these root paths in memory (and not a path to every goal state as in the straw man algorithm).
 %
-In the second step of the preprocessing stage, the algorithm computes for each root path a new path to each goal state for every state along the path. However, this is done by attempting to re-use previously computed root paths which allows for a very low memory footprint.
+In the second step of the preprocessing stage, the algorithm computes for all replanabale states along all root paths a new path to each goal state. However, this is done by attempting to re-use previously-computed root paths which, in turn, allows for a very low memory footprint.
 %
 The remainder of this section formalizes these ideas.
+
+\os{Oren - I got an impression from this para that the replanable states are only the ones that lie on the root paths from \Shome, however whenever the recursion happens we compute a new set of root paths and generate new replanable states}
 
 \subsection{Planning using experiences}
 \label{subsec:experience}
@@ -265,9 +278,8 @@ The key insight is that in our setting, we always start at \Shome which is the f
 To this end, given a heuristic function $h$ we define for each root path $\Pi$ and each goal state $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the   state that is closest to~$g$ with respect~$h$.
 Namely,
 $$
-\Ssc (\Pi,g) := \argmin\limits_{s_i \in \Pi} h(s_i, g)
+\Ssc (\Pi,g) := \argmin\limits_{s_i \in \Pi} h(s_i, g).
 $$
-
 Now, when searching for a path to a goal state $g \in \Gfull$ we
 (i)~add $\Ssc (\Pi,g)$ as a successor for any state along $\Pi$
 (subject to the constraint that the path along $\Pi$ to \Ssc is collision free)
@@ -276,9 +288,11 @@ and
 $$
 h(s,g) = \min(h(s,\Ssc (\Pi,g)) + h(\Ssc (\Pi,g),g), \varepsilon \cdot h(s,g)).
 $$
-Here, $\varepsilon$ is a penalty term that biases the search to find a path via \Ssc.
+Here, $\varepsilon>1$ is a penalty term that biases the search to find a path via \Ssc.
 
+\os{We will probably get rid of this heuristic function}
 
+\os {Oren - We should either use the term experience or root path throughout the paper}
 \ignore{
 \os{FAHAD - can you sketch something here?}
 \subsubsection{Shortcut Successor}
@@ -304,10 +318,14 @@ where $\epsilon (\geq 1)$ is a penalty term that biases the search to find a pat
 \os{Oren - Can we have a figure explaining these two subsections?}
 }
 \subsection{Algorithmic details}
-Our algorithm starts by sampling a goal state $g_1 \in \Gfull$ and computing a root path $\Pi_1$ from $\Shome$ to $g_1$. We then associate with $\Pi_1$ all goal states $G_1 \subset \Gfull$ such that $\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$ (see Sec.~\ref{subsec:experience}.
+Our algorithm starts by sampling a goal state $g_1 \in \Gfull$ and computing a root path $\Pi_1$ from $\Shome$ to $g_1$. We then associate with $\Pi_1$ all goal states $G_1 \subset \Gfull$ such that $\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$ (see Sec.~\ref{subsec:experience}).
+Thus, all goal states in $G_1$ are covered by \Shome.
 %
-We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus G_1$.
-At the end of this step, we obtain a set of root paths. Each root path $\Pi_i$ is associated with a goal set $G_i \subseteq \Gfull$ such that $\Pi_i$ can be used as an experience in reaching any state in $g_i' \in G_i$.
+We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus \Gcov$, where \Gcov is the set of goal states already covered by \Shome.
+At the end of this step, we obtain a set of root paths. 
+Each root path $\Pi_i$ is associated with a goal set $G_i \subseteq \Gfull$ such that 
+(i)~$\Pi_i$ can be used as an experience in reaching any state in $g_i' \in G_i$ and 
+(ii)~$\bigcup_i G_i = \Gfull$.
 %
 For a visualization of this step, see Fig.~\ref{fig:crp}.
 For pseudocode see Alg.~\ref{alg:step1}.
@@ -378,56 +396,131 @@ For pseudocode see Alg.~\ref{alg:step1}.
 \end{algorithmic}
 \end{algorithm}
 
+Equipped with a set of root paths and the corresponding goal regions they cover, we now need to allow for efficient replanning. This is done by using the following two observations:
+\begin{enumerate}[label={\textbf{O\arabic*}},leftmargin=0.75cm]
+    \item \label{obs:1} 
+    Assume that the robot is executing a path $\Pi_i$ to $g_i \in G_i$ and that $\Pi_{s, i \rightarrow j}$ is a path starting at state $s \in \Pi_i$ and ending at goal $g_j \in \Gfull \setminus G_i$.
+    If the last update given by the perception system happens $\Tbound + \delta_t$ before $s$ is reached,
+    then the system can execute path $\Pi_i$ until $s$ and then continue executing $\Pi_{s, i \rightarrow j}$ to reach  $g_j$.
 
-Similar to the straw man algorithm presented in Sec.~\ref{subsec:strawman}, the preprocessing stage has a second step which allows for efficient replanning.
+    \item \label{obs:2} 
+    Assume that the robot is executing a path $\Pi_i$ to $g_i \in G_i$ and that $\pi_{s,s',i \rightarrow j}$ is a path connecting  $s \in \Pi_i$ to $s' \in \Pi_j$ (with $\Pi_j$ the root path to $g_j \in G_j$).
+    If the last update given by the perception system happens $\Tbound + \delta_t$ before~$s$ is reached,
+    and the new goal is in $G_j$,
+    then the system can execute path $\Pi_i$ until $s$, execute $\pi_{s,s',i \rightarrow j}$ and then continue executing $\Pi_{j}$ from $s'$ until the goal is reached.
+
+\end{enumerate}
+
+%\subsubsection{Procrastination is a bliss}
+%Recall that in the straw man algorithm presented in Sec.~\ref{subsec:strawman}, given a path $\Pi$ connecting \Shome to some goal $g$, we computed a path to every goal state $\Gfull \setminus \{g\}$ from all replanable states.
 %
+Observation~\ref{obs:1} implies that if we can cover a goal state $g'$  by some state $s$ along $\Pi_g$ (with $g \neq g'$), then we cover $g'$ by all states $\Pi$ that occur before~$s$.
+%
+Observation~\ref{obs:2} implies that if we can compute a path connecting one root path to some other root path, a process we term as ``latching'' on to the new path, then the new root path can be used to reach all its associated goal states.
+
+We are finally ready to describe the second step of our preprocessing stage.
+%
+For every root path $\Pi_i$ we look at the last replanning state $s_{\Pi_i, \Trc}$ (namely, the state that is $t=\Trc$ time from \Shome). For every other root path $\Pi_j$, we test if the path connecting $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc + \delta_t}$ (the state on $\Pi_j$ that is $\Trc+\delta_t$ away from \Shome) is collision free. 
+%
+If this is the case then all goal states in $G_j$ are covered by all replanning states along $\Pi_i$
+%
+
+Let $\Guncov(\Trc)$ be all the states that are still uncovered after the above process. We recursively apply our algorithm to the setting where the start state is $s_{\Pi_i, \Trc}$ and the goal region is $\Guncov(\Trc)$.
+If all states are covered after this step, we terminate. 
+If not, let $\Guncov(\Trc)'$ be all the states still uncovered.
+We consider the state $s_{\Pi_i, \Trc-\delta_t}$ (the state on $\Pi_j$ that is $\Trc-\delta_t$ away from \Shome) and recursively run our algorithm where the start state is $s_{\Pi_i, \Trc-\delta_t}$ and the goal region is $\Guncov(\Trc)'$.
+This process is repeated until either all states are covered or we backtracked to \Shome.
+For a visualization of this step, see Fig.~\ref{fig:pl}.
+For pseudocode see Alg.~\ref{alg:all} and~\ref{alg:step1}.
+
+\begin{algorithm}
+\caption{\textsc{PreprocessMain(\Shome, \Gfull)}}\label{alg:all}
+\begin{algorithmic}[1]
+\State \textsc{Preprocess}($\Shome, \Gfull$)
+\end{algorithmic}
+\end{algorithm}
+
+
+\ignore{
+Before describing how this is done, consider two root paths $\Pi_i$ and $\Pi_j$ with associated goal regions $G_i$ and~$G_j$, respectively.
+Now, let $s_i$ and $s_j$ be states on $\Pi_i$ and $\Pi_j$, respectively, such that the timestamp associated with $s_j$ is $\delta_t$ time after the one associated with $s_i$. Furthermore, assume that the path between $s_i$ and $s_j$ is collision free. 
+%
+Now, assume that the robot is executing path $\Pi_i$ (targeting a goal state in $G_i$) and the perception system updates the goal state to be reached as $g_j \in G_j$. 
+If the robot did not yet reach $s_i$ then it can reach $g_j$ by
+(i)~continuing to follow $\Pi_i$ until $s_i$ is reached, 
+(ii)~move to $s_j$ on $\Pi_j$ and 
+(iii)~use $\Pi_j$ to reach $g_j$.
+%
+We term the process we just described of moving from one root path to another as ``latching'' on to a new root path.
+
+Let $s_{\Pi_i, t}$ be the state that is $t$ time from \Shome on path $\Pi_i$.
+If a collision-free path existed from $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc+\delta_t}$ for every $i,j$ then we could latch on from any root path to any other root path. Moreover, following Assumption~\ref{assum:4}, $\Trc$ is the last time that the perception could update the goal location so no other replanning would be required.
+%
+Unfortunately, this may not be the case.
+%
+Thus, for every root path $\Pi_i$, we consider $s_{\Pi_i, \Trc}$ and check if we can latch on to all other root paths. 
+If this can't be done, then we can tr
+
+considering the last replanning state $s_{\Pi_i, \Trc}$ (namely, the state that is $t=\Trc$ time from \Shome). For every other root path $\Pi_j$, we test if the path connecting $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc + \delta_t}$ (the state on $\Pi_j$ that is $\Trc+\delta_t$ away from \Shome) is collision free. 
+
+In the straw man algorithm this was obtained by recursively computing a path for the replanning states along all the previously-computed paths.
+%
+Here, we attempt to re-use the previously-computed paths as much as possible by ``latching'' onto them.
+
+
+
+
+More formally, for each root path~$\Pi_i$, we start by considering the last replanning state $s_{\Pi_i, \Trc}$ (namely, the state that is $t=\Trc$ time from \Shome). For every other root path $\Pi_j$, we test if the path connecting $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc + \delta_t}$ (the state on $\Pi_j$ that is $\Trc+\delta_t$ away from \Shome) is collision free. 
+If this is the case we know that any goal state in $G_j$ can be
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{algorithm}
-\caption{\textsc{Preprocess}($s_{\textrm{start}},G^{\textrm{UNCOV}},G^{\textrm{COV}}$)}\label{alg:2}
+\caption{\textsc{Preprocess}($\Sstart,\Guncov,\Gcov $)}\label{alg:2}
 \begin{algorithmic}[1]
-\State $\Psi_{\textrm{work}}, G'^{\textrm{UNCOV}}_{\textrm{work}} \leftarrow$ \textsc{ComputeRootPaths}($s_{\textrm{start}},G^{\textrm{UNCOV}}$)
+\State $\Psi_{\textrm{work}}, G'^{\textrm{uncov}}_{\textrm{work}} \leftarrow$ \textsc{ComputeRootPaths}($\Sstart,\Guncov$)
 
-\If {$s_{\textrm{start}} = \Shome$}
+\If {$\Sstart = \Shome$}
     \State $\Psi_{\textrm{home}} = \Psi_{\textrm{work}}$
 \EndIf
 
-\State $G'^{\textrm{COV}} \leftarrow G^{\textrm{COV}} \cup (G^{\textrm{UNCOV}} \setminus G'^{\textrm{UNCOV}}_{\textrm{work}})$
+\State $G'^{\textrm{cov}} \leftarrow 
+    \Gcov \cup (\Guncov \setminus G'^{\textrm{uncov}}_{\textrm{work}})$
 \If{$t(s_{\textrm{start}}) \geq \Trc$}
-    \State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
+    \State \textbf{return} $G'^{\textrm{uncov}}_{\textrm{work}}, G'^{\textrm{cov}}$
 \EndIf
 \For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\textrm{work}}$}
-    \State $G_i^{\textrm{COV}} \leftarrow G_i$;
+    \State $G_i^{\textrm{cov}} \leftarrow G_i$;
             \hspace{2mm}
-           $G_i^{\textrm{UNCOV}} \leftarrow G'^{\textrm{COV}} \setminus G_i$;
+           $G_i^{\textrm{uncov}} \leftarrow G'^{\textrm{cov}} \setminus G_i$;
             \hspace{2mm}
            $t = \Trc$
 %    \State $t = \Trc$
 %    \State $G_i^{\textrm{UNCOV}} \leftarrow G'^{\textrm{COV}} \setminus G_i$
 %    \State $G_i^{\textrm{COV}} \leftarrow G_i$
 
-    \While{$t \geq t(s_{\textrm{start}})$}
+    \While{$t \geq t(\Sstart)$}
         \State $s \leftarrow$ \textsc{GetState($\Pi_i, t$)}
         \For {\textbf{each} $(\Pi_j, G_j) \in \Psi_{\textrm{home}}$}
             \If{\textsc{CheckSnap}($s,\Pi_j$)}
-                \State $G_i^{\textrm{UNCOV}} \leftarrow G_i^{\textrm{UNCOV}} \setminus G_j$
-                \State $G_i^{\textrm{COV}} \leftarrow G_i^{\textrm{COV}} \cup G_j$
+                \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} \setminus G_j$
+                \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_j$
             \EndIf
         \EndFor
         % }
         %%%%%%%%% LATCHING END
-        \If{$G_i^{\textrm{UNCOV}} = \emptyset$}
+        \If{$G_i^{\textrm{uncov}} = \emptyset$}
             \State \textbf{break}
         \EndIf
-        \State $G_i^{\textrm{UNCOV}},G_i^{\textrm{COV}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{UNCOV}},G_i^{\textrm{COV}}$)
-        \If{$G_i^{\textrm{UNCOV}} = \emptyset$}
+        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)
+        \If{$G_i^{\textrm{uncov}} = \emptyset$}
             \State \textbf{break}
         \EndIf
         \State $t \leftarrow t - \delta_t$
     \EndWhile
     % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
 \EndFor
-\State \textbf{return} $G'^{\textrm{UNCOV}}_{\textrm{work}}, G'^{\textrm{COV}}$
+\State \textbf{return} $G'^{\textrm{uncov}}_{\textrm{work}}, G'^{\textrm{cov}}$
 
 \end{algorithmic}
 \end{algorithm}
@@ -495,8 +588,9 @@ Similar to the straw man algorithm presented in Sec.~\ref{subsec:strawman}, the 
     (\subref{fig:pl2})~text.
     %
     (\subref{fig:pl3})~text.
+    \os{update text}
     }
-    \label{fig:crp}
+    \label{fig:pl}
 \end{figure*}
 
 \section{Evaluation}
