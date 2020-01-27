@@ -97,15 +97,18 @@ urlcolor=blue
 
 \maketitle
 
+% \begin{abstract}
+% Robots in warehouse environments typically perform repetitive tasks such as picking and placing of moving objects on a conveyor belt. Motion planning needs to be efficient and reliable in these domains to ensure high and consistent throughput. The success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot must start moving early on (relying on the first noisy estimate) to be able to reach the object in time and then adjust its motion as it gets improved estimates.
+% To this end we propose a real-time replanning framework that would guarantee a bound on the reaction time of the robot whenever a perception update is received. Our key insight is that for repetitive tasks the paths look very similar and can efficiently be reused to minimise the processing time and memory footprint. Our framework leverages offline preprocessing to compute a representative set of paths (with some auxiliary data structures) which can then be used online to generate a plan from any point during execution (if one exists) in bounded time. We show our results on a 7 DOF robot arm, demonstrating the robot picking up objects from a conveyor belt.
+% \end{abstract}
+
 \begin{abstract}
-Robots in warehouse environments typically perform repetitive tasks such as picking and placing of moving objects on a conveyor belt. Motion planning needs to be efficient and reliable in these domains to ensure high and consistent throughput. The success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot must start moving early on (relying on the first noisy estimate) to be able to reach the object in time and then adjust its motion as it gets improved estimates.
-To this end we propose a real-time replanning framework that would guarantee a bound on the reaction time of the robot whenever a perception update is received. Our key insight is that for repetitive tasks the paths look very similar and can efficiently be reused to minimise the processing time and memory footprint. Our framework leverages offline preprocessing to compute a representative set of paths (with some auxiliary data structures) which can then be used online to generate a plan from any point during execution (if one exists) in bounded time. We show our results on a 7 DOF robot arm, demonstrating the robot picking up objects from a conveyor belt.
+In warehousing and manufacturing environments, manipulation platforms are excessively deployed on the conveyor belts to perform fast pick and place tasks. Because the objects on the conveyor belts are moving, the robots have limited time to pick them up. This brings the need for fast and reliable motion planners that could provide constant-time planning guarantees. Besides the planning efficiency, the success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts execution; it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly to be able to reach the object in time. We propose an approach that meets these requirements by providing provable constant-time planning and replanning guarantees. We present it, give its analytical properties and show experimental analysis in simulation and on a real robot.
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-write intro
 %1. What is the problem?
 %2. Why is it relevant?
 %3. Why is it hard?
@@ -116,7 +119,27 @@ write intro
 %8. What are our contributions?
 %9. What are our limitations?
 
+%% motivation
+Conveyor belts are widely used in automated distribution, warehousing, as well as for manufacturing and production facilities. In the modern times robotic manipulators are largely being deployed on the conveyor belts for automation and fast operations [\os{add citations}]. To maintain a high distribution throughput, manipulators must pick up moving objects without having to stop the conveyor for every grasp. We consider the problem of motion planning for grasping moving objects off a conveyor. Moving objects impose a requirement that they should be picked up in a short window of time. The motion planner, therefore, must compute a path within a bounded time to be able to successfully achieve this task.
+
+%% why replanning?
+Manipulation relies on good quality detection and localization of moving objects. When the object first enters the field of view of the robot, the initially perception estimate are often inaccurate. \os{add example here with the figure} If the robot waits for the object to come closer in order to get an accurate estimate, for fast moving conveyors it will be too late and the robot is likely to miss the object. Therefore, the robot should start executing a plan computed for the initial pose and as it gets better estimates, repeatedly replan for the new goals. For every replanning query, the time window for the pickup even shrinks and thus the motion planner must support real-time replanning.
+
+%% why problem is hard
+The planning problem is challenging because the motion planner has to account for the dynamic object and thus plan in the time dimension. It should generate a valid trajectory that not only avoids collision with the environment around it but also with the target object to ensure that it does not damage or topple it during the grasp. To avoid collisions with the object, requires precise geometric collision checking between the object geometry and the geometry of the manipulator's gripper links. The complexity of the planning problem makes it infeasible to plan online for this task.
+
+%%
+We propose a planning framework that leverages offline preprocessing to provide bounds on the planning time when the planner is invoked online. The key insight in this work is that for the conveyor manipulation domain the manipulation task is highly repetitive; even for different object poses the computed paths look very similar and can be efficiently reused to speed up online planning. We precompute a representative set of paths offline with some auxiliary datastructures that can be used online to plan in constant time. For this work we assume that the models of the target objects are known. Namely, the planner will be provided with the geometric model of the target object apriori. To the best of our knowledge, non of the existing methods provides constant-time planning guarantees even for known environments. 
+
+%
+We experimentally show that constant-time planning and replanning capability is necessary for a successful conveyor pickup task. With one time planning, either following the plan for the initial noisy pose estimate or from a delayed but accurate pose estimate, both result in frequent failures.
+
 \section{Related work}
+\subsubsection{Planning for Conveyor Pickup Task}
+% 1. Planning for conveyor belts
+% 2. Preprocessing based planning
+% 3. Fast replanning
+
 Include ICAPS paper~\cite{ISL19}
 
 Relevant papers from our lab:
