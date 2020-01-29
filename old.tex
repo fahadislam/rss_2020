@@ -204,7 +204,39 @@ The term $t(s,g)$ is the expected time to intercept the object. It can be analyt
   \item \textsc{MergePathsWithSnap}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments with a snapping edge in between, first path being $\pi_i$ starting from its first state up until the state at time stamp $t$, then the edge connecting state on $\pi_i$ at time $t$ to the state on $\pi_j$ at time $t + \delta t$, followed by $\pi_j$ starting from the state at $t + \delta t$ and up until the end of it.
 \end{itemize}
 
-\section{Experiments}
+\section{Experiments and Evaluation}
+\subsection{Setup}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/timeline.pdf}
+    \caption{The figure shows the different time triggers on a timeline (increasing left to right) that are used for one ``perception" $\rightarrow$ ``planning" $\rightarrow$ ``execution" cycle while the object moves on the converyor from left to right.
+    1.~$t_{\textrm{img}}$ is when the robot captures the image (point cloud) of the object. 
+    2.~$t_{\textrm{msg}}$ is when the robot finds the pose estimate (in $\tau_{\textrm{perception}}$) and starts planning. 
+    3. $t_{\textrm{plan}}$ is when the plan is computed. Note that our planner guarantees that $t_{\textrm{plan}}$ will be computed within the bound $\tau_{\textrm{bound}}$. 
+    4. After $t_{\textrm{plan}}$ the robot waits for $\tau_{\textrm{wait}}$
+    5. At $t_{\textrm{exec}}$, the robot starts executing the plan. Note that the goal $g$ that the planner plans for is not for the object pose at $t_{\textrm{img}}$ but its forward projection in time to $t_{\textrm{exec}}$ to account for $\tau_{\textrm{perception}}$ and $\tau_{\textrm{bound}}$.
+    6. During the execution time $\tau_{\textrm{execution}}$, if we the robot computes an updated pose estimate, the execution is preempted and the cycle repeats.
+    }
+    \label{fig:tl}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{figs/pose_error.pdf}
+    \caption{
+    The figure illustrates how we pick $G^{\textrm{full}}$ and how the perception errors are handled in the planning framework. The figure shows the top view of a conveyor belt with the sugar box moving from left to right.
+    $G^{\textrm{full}}$ is selected such that the system can handle any arbitrary pose~$(x,y,yaw)$ of the object and also account for a bounded error in the pose estimates.
+    $G^{\textrm{full}}$ contains all possible $y$ positions of the object as well as all $yaw$ angles. 
+    Along the $x$-axis it contains a window of size $\pm \epsilon$ centered along a position $x_{\textrm{exec}}$.
+    $x_{\textrm{exec}}$ is a fixed position that we use to plan for any incoming object for the first planning cycle no matter where the robot first sees the object, but it must be no farther than $x_{\textrm{exec}}$.
+    %
+    In the shown example, the thick and the thin solid rectangles show the ground truth and estimated poses respectively at two time instances in the life time of the object.
+    The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During execution, the robot receives an improved estimate and has to replan for it. At this point we back project this new estimate in time using the known speed of the conveyor and the time duration between the two estimates. This back-projected pose (shown as the dotted rectangle) is then picked as the new goal for replanning. Now under our assumption that the estimate will be within the $\pm \epsilon$ window along $x$ dimension, it will always lie within $G^{\textrm{full}}$ and as $G^{\textrm{full}}$ contains all ($y, yaw$), it can handle the errors along those dimensions.
+    }
+    \label{fig:pe}
+\end{figure}
+
 \subsection*{Our Algorithm}
 \begin{itemize}
     \item Preprocessing: total preprocessing time, memory consumption, total trajectories stored, total states for which Alg.~\ref{alg:2} was called, mean time for \textsc{PlanPath}() function 
