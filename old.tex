@@ -1,5 +1,5 @@
 \section{Algorithm}
-
+\ignore{
 \subsection{Problem Definition and Assumptions}
 We define a goal region $G^{\textrm{full}}$ as a discretized set of initial object poses on the conveyor belt that the robot can perceive when the object comes in its field of view. Given a home configuration for the robot $s_{\textrm{home}}$, we want to be able to plan for any goal pose $g_{\textrm{init}}$ in bounded time $t_{\textrm{bound}}$. The perception system is setup such that it sends updated pose estimates on the fly during execution as it gets better estimates over time. Given any current state of the robot during execution $s_{\textrm{start}}$, the planner should be able to replan from $s_{\textrm{start}}$ to any subsequent goal $g_{\textrm{next}}$.
 
@@ -203,6 +203,12 @@ The term $t(s,g)$ is the expected time to intercept the object. It can be analyt
   \item \textsc{MergePaths}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments, first being $\pi_i$ starting from its first state up until the state at time stamp $t$, and the second being $\pi_j$.
   \item \textsc{MergePathsWithSnap}($\pi_i,\pi_j,t$) constructs a new path $\pi$ by joining two path segments with a snapping edge in between, first path being $\pi_i$ starting from its first state up until the state at time stamp $t$, then the edge connecting state on $\pi_i$ at time $t$ to the state on $\pi_j$ at time $t + \delta t$, followed by $\pi_j$ starting from the state at $t + \delta t$ and up until the end of it.
 \end{itemize}
+
+
+}
+
+\newpage
+
 
 \section{Experiments and Evaluation}
 \subsection{Setup}
