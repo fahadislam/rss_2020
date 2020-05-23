@@ -49,6 +49,7 @@ urlcolor=blue
 }
 
 \input{macros.tex}
+\hypersetup{draft}
 \begin{document}
 
 % paper title
@@ -145,12 +146,12 @@ However, if the robot waits too long to get an accurate estimate of the object p
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.25\textwidth]{figs/cover_pic.jpg}
+    \includegraphics[trim=0 50 0 100, clip, width=0.35\textwidth]{figs/cover_pic.jpg}
     \caption{
     \CaptionTextSize
     A scene demonstrating the PR2 robot picking up a moving object (sugar box) off a conveyor belt.}
     \label{fig:intro_pic}
-    \vspace{-7.5mm}
+    %\vspace{-7.5mm}
 \end{figure}
 
 
@@ -184,7 +185,7 @@ We experimentally show that constant-time planning and replanning capability is 
     %, calculated as the average pair wise minimum distance between the input point cloud and the point cloud corresponding to the predicted pose.
     }
     \label{fig:pose_sequence}
-    \vspace{-7.5mm}
+    %\vspace{-7.5mm}
 \end{figure}
 
 \section{Related work}
@@ -336,7 +337,7 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     (\subref{fig:naive2})~Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. 
     This is repeated recursively for the new paths but not visualized.}
     \label{fig:naive}
-    \vspace{-5mm}
+    %\vspace{-5mm}
 \end{figure}
 
 We divide the preprocessing stage into two steps.
@@ -424,7 +425,7 @@ The search is guided by an efficient and fast-to-compute heuristic function whic
 The first component drives the search to intercept the object at the right time and 
 the second component guides the search to correct the orientation of the end effector as it approaches the object. 
 More formally, our heuristic function is given by
-\vspace{-3mm}
+%\vspace{-3mm}
 $$
  h(s,g) = \max (w \cdot t(s,g), \textsc{AngleDiff}(s,g)).
 $$
@@ -433,7 +434,7 @@ Here, $t(s,g)$ is the expected time to intercept the object which can be analyti
 \subsubsection{Planning using experiences}
 We now show how previously computed paths which we call ``experiences" can be reused in our framework. Given a heuristic function $h$ we define for each root path $\Pi$ and each goal state $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the  state that is closest to~$g$ with respect~$h$.
 Namely,
-\vspace{-3mm}
+%\vspace{-3mm}
 $$
 \Ssc (\Pi,g) := \argmin\limits_{s_i \in \Pi} h(s_i, g).
 $$
@@ -503,144 +504,209 @@ We are finally ready to describe our algorithm describing first the preprocessin
     (\subref{fig:crp3})~The goal region covered by four root paths from \Shome after the first step of the preprocessing stage terminates.
     }
     \label{fig:crp}
-    \vspace{-5mm}
+    %\vspace{-5mm}
 \end{figure*}
-Our preprocessing stage starts by sampling a goal state~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ all goal states~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any state in $g_1' \in G_1$ within~\Tbound
+
+Our preprocessing stage starts by sampling a goal state~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ all goal states~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any $g_j \in G_1$ within~\Tbound.
 Thus, all goal states in~$G_1$ are covered by~\Shome.
 %
-We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus \Gcov$, where~\Gcov is the set of goal states already covered by \Shome.
+We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus G_1$, thereby removing covered goals from \Gfull in every iteration.
 At the end of this step, we obtain a set of root paths. 
 Each root path~$\Pi_i$ is associated with a goal set $G_i \subseteq \Gfull$ such that 
-(i)~$\Pi_i$ can be used as an experience in reaching any state in $g_i' \in G_i$ in~\Tbound and 
-(ii)~$\bigcup_i G_i = \Gfull$.
+(i)~$\Pi_i$ can be used as an experience for planning to any $g_j \in G_i$ in~\Tbound and 
+(ii)~$\bigcup_i G_i = \textsc{Reachable}(\Shome, \Gfull)$ (i.e all reachable goals for \Shome in \Gfull).
 %
-See Fig.~\ref{fig:crp}.and  Alg.~\ref{alg:step1}, respectively.
+Alg.~\ref{alg:step1} details this step (if called for arguments (\Shome,\Gfull)) and is illustrated in Fig.~\ref{fig:crp}. Alg.~\ref{alg:step1} also returns a set of unreachable goals that are left uncovered.
 
 
 
 
 \begin{algorithm}[t]
-\caption{\textsc{ComputeRootPaths}($s_{\textrm{start}}, \Guncov$)}
+\caption{Plan Root Paths}
 \label{alg:step1}
     \AlgFontSize
 \begin{algorithmic}[1]
-\State $\Psi \leftarrow \emptyset$   \Comment{A list of pairs ($\Pi_i, G_i)$}
-\State $\Guncovp \leftarrow \emptyset$; \hspace{3mm}
-       $\Gcovp \leftarrow \emptyset$; \hspace{3mm}
+\Procedure{PlanRootPaths}{$s_{\textrm{start}}, \Guncov$}
+\State $\Psi_{\Sstart} \leftarrow \emptyset$   \Comment{a list of pairs ($\Pi_i, G_i)$}
+\State $\Guncov_{\Sstart} \leftarrow \emptyset$; \hspace{3mm}
        $i = 0$
 \While{$\Guncov \neq \emptyset$}
-        \Comment{Runs until all uncovered points are considered}
-    \State $g_i \leftarrow$\textsc{Sample}($\Guncov$)
-    \State $\Guncov \leftarrow \Gcov \setminus \{g_i\}$
+        \Comment{until all reachable goals are covered}
+    \State $g_i \leftarrow$\textsc{SampleGoal}($\Guncov$)
+    \State $\Guncov \leftarrow \Guncov \setminus \{g_i\}$
     
-    \State $\Pi_i \leftarrow$ \textsc{Plan}($s_{\textrm{start}}, g_i$)
-        \Comment{Plans root path}
-    \If {$\Pi_i = \emptyset$}  \Comment{Path does not exist}
-        \State $\Guncovp \leftarrow \Guncovp \cup \{g_i\}$
-    \Else
-        \State $G_i \leftarrow \{ g_i \}$
+%    \State $\Pi_i \leftarrow$ \textsc{PlanPath}($s_{\textrm{start}}, g_i$)
+%        \Comment{plan root path}
+    \If {$\Pi_i \leftarrow$ \textsc{PlanRootPath}($s_{\textrm{start}}, g_i$)} \Comment{planner succeeded}
+        \State $G_i \leftarrow \{ g_i \}$	\Comment{goals reachable}
         \For {\textbf{each} $g_j \in \Guncov$}
-            \State $\pi_j \leftarrow$\textsc{Plan}($s_{\textrm{start}},g_j,\Pi_i$)
-                \Comment{Plans using root path as experience}
-            \If {$\pi_j \neq \emptyset$} \Comment{Planner succeeded}
+%            \State $\pi_j \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g_j,\Pi_i$)
+            \If {$\pi_j \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g_j,\Pi_i$)}
                 \State $G_i \leftarrow G_i \cup \{g_j\}$
                 \State $\Guncov \leftarrow \Guncov \setminus \{g_j\}$
             \EndIf
         \EndFor
-        \State $\Psi \leftarrow \Psi \cup \{ (\Pi_i, G_i)\}$
-        \Comment{Insert $(\Pi_i, G_i)$ to $\Psi$}
-        \State $i \leftarrow i + 1$
+        \State $\Psi_{\Sstart} \leftarrow \Psi_{\Sstart} \cup \{ (\Pi_i, G_i)\}$; \hspace{3mm}
+        $i \leftarrow i + 1$
+        
+    \Else
+        \State $\Guncov_{\Sstart} \leftarrow \Guncov_{\Sstart} \cup \{g_i\}$ \Comment{goals unreachable}
     \EndIf
 \EndWhile
-\State \textbf{return} $\Psi, \Guncovp$
+\State \textbf{return} $\Psi_{\Sstart}, \Guncov_{\Sstart}$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{algorithm}[t]
-\caption{\textsc{PreprocessMain(\Shome, \Gfull)}}\label{alg:all}
-    \AlgFontSize
-\begin{algorithmic}[1]
-    \State \textsc{Preprocess}($\Shome, \Gfull$)
-\end{algorithmic}
-\end{algorithm}
+%\begin{algorithm}[t]
+%\caption{\textsc{PreprocessMain(\Shome, \Gfull)}}\label{alg:all}
+%    \AlgFontSize
+%\begin{algorithmic}[1]
+%    \State \textsc{Preprocess}($\Shome, \Gfull, \emptyset$)
+%\end{algorithmic}
+%\end{algorithm}
 %
 \begin{algorithm}[t]
-\caption{\textsc{Preprocess}($\Sstart,\Guncov,\Gcov $)}\label{alg:preprocess}
+\caption{Preprocess}\label{alg:preprocess}
     \AlgFontSize
 \begin{algorithmic}[1]
-\State $\Psi_{\textrm{work}}, G'^{\textrm{uncov}}_{\textrm{work}} \leftarrow$ \textsc{ComputeRootPaths}($\Sstart,\Guncov$)
-
-\If {$\Sstart = \Shome$}
-    \State $\Psi_{\textrm{home}} = \Psi_{\textrm{work}}$
-\EndIf
-
-\State $G'^{\textrm{cov}} \leftarrow 
-    \Gcov \cup (\Guncov \setminus G'^{\textrm{uncov}}_{\textrm{work}})$
-\If{$t(s_{\textrm{start}}) \geq \Trc$}
-    \State \textbf{return} $G'^{\textrm{uncov}}_{\textrm{work}}, G'^{\textrm{cov}}$
-\EndIf
-\For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\textrm{work}}$}
-    \State $G_i^{\textrm{cov}} \leftarrow G_i$;
-            \hspace{2mm}
-           $G_i^{\textrm{uncov}} \leftarrow G'^{\textrm{cov}} \setminus G_i$;
-            \hspace{2mm}
-           $t = \Trc$
-%    \State $t = \Trc$
-%    \State $G_i^{\textrm{UNCOV}} \leftarrow G'^{\textrm{COV}} \setminus G_i$
-%    \State $G_i^{\textrm{COV}} \leftarrow G_i$
-
-    \While{$t \geq t(\Sstart)$}
-        \State $s \leftarrow$ \textsc{GetState($\Pi_i, t$)}
-        \For {\textbf{each} $(\Pi_j, G_j) \in \Psi_{\textrm{home}}$}
+\Procedure{TryLatching}{$s,\Psi_{\Shome}\Guncov,\Gcov$}
+%\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goal states for $\Shome$ } 
+        \For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\Shome}$}
         \label{alg:preprocess:line:latch1a}
-            \If{\textsc{CanLatch}($s,\Pi_j$)}
-                \State $G_i^{\textrm{uncov}} \leftarrow G_i^{\textrm{uncov}} \setminus G_j$
-                \State $G_i^{\textrm{cov}} \leftarrow G_i^{\textrm{cov}} \cup G_j$
+            \If{\textsc{CanLatch}($s,\Pi_i$)}
+                \State $\Guncov \leftarrow \Guncov \setminus G_i$
+                \State $\Gcov \leftarrow \Gcov \cup G_i$
                 \label{alg:preprocess:line:latch1b}
             \EndIf
         \EndFor
         % }
+\State \textbf{return} $\Guncov, \Gcov$
+\vspace{2mm}
+\EndProcedure
+%%%%%%%%%%
+\Procedure{Preprocess}{$\Sstart,\Guncov,\Gcov$}
+\State $\Psi_{\Sstart}, G^{\textrm{uncov}}_{\Sstart} \leftarrow$ \textsc{PlanRootPaths}($\Sstart,\Guncov$)
+%
+{\color{blue}{ \State \textbf{if} $\Sstart = \Shome$ \textbf{then} $\Psi_{\Shome} = \Psi_{\Sstart}$}}
+
+%\If {$\Sstart = \Shome$}
+%    \State $\Psi_{\Shome} = \Psi_{\textrm{work}}$
+%\EndIf
+%}}
+
+
+\State $G^{\textrm{cov}}_{\Sstart} \leftarrow 
+    \Gcov \cup (\Guncov \setminus G^{\textrm{uncov}}_{\Sstart})$
+\If{$t(s_{\textrm{start}}) \leq \Trc$}
+%    \State \textbf{return} $G^{\textrm{uncov}}_{\Sstart}, G^{\textrm{cov}}_{\Sstart}$
+
+\For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\Sstart}$} \label{loop1}
+    \State $G_i^{\textrm{cov}} \leftarrow G_i$;
+            \hspace{2mm}
+           $G_i^{\textrm{uncov}} \leftarrow G^{\textrm{cov}}_{\Sstart} \setminus G_i$; \label{uncov_init}
+            \hspace{2mm}
+
+	\For {\textbf{each} $s \in \Pi_i$ ({from last to first})} \Comment{states up to $\Trc$} \label{loop2}
+%    \While{$t \geq t(\Sstart)$}
+%        \State $s \leftarrow$ \textsc{GetState($\Pi_i, t$)}
+\textcolor{blue}{
+        \State $\Guncov_i,\Gcov_i \leftarrow$ \textsc{TryLatching}($s,\Psi_{\Shome},\Guncov_i,\Gcov_i$)
         %%%%%%%%% LATCHING END
         \If{$G_i^{\textrm{uncov}} = \emptyset$}
             \State \textbf{break}
         \EndIf
-        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)
-        \If{$G_i^{\textrm{uncov}} = \emptyset$}
+} %color
+        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)	\label{recursion}
+        \If{$G_i^{\textrm{uncov}} = \emptyset$} \label{terminate}
             \State \textbf{break}
         \EndIf
-        \State $t \leftarrow t - \delta_t$
-    \EndWhile
+%        \State $t \leftarrow t - \delta_t$
+ %   \EndWhile
+ 
+ 	\EndFor
     % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
 \EndFor
-\State \textbf{return} $G'^{\textrm{uncov}}_{\textrm{work}}, G'^{\textrm{cov}}$
-
+\EndIf
+\State \textbf{return} $G^{\textrm{uncov}}_{\Sstart}, G^{\textrm{cov}}_{\Sstart}$
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
+%%%%%%%%%%%%%%%%%%%%%LATCHING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{algorithm}[t]
+%\caption{\textsc{TryLatching}($\Sstart,\Guncov,\Gcov$)}\label{alg:latch_preprocess}
+%    \AlgFontSize
+%\begin{algorithmic}[1]
+%%\State $\Guncovp = \Guncov$; \hspace{3mm} $\Gcovp = \Gcov$ 
+%\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goal states for $\Shome$ } 
+%        \For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\Shome}$}
+%        \label{alg:preprocess:line:latch1a}
+%            \If{\textsc{CanLatch}($s,\Pi_i$)}
+%                \State $\Guncov \leftarrow \Guncov \setminus G_i$
+%                \State $\Gcov \leftarrow \Gcov \cup G_i$
+%                \label{alg:preprocess:line:latch1b}
+%            \EndIf
+%        \EndFor
+%        % }
+%\State \textbf{return} $\Guncov, \Gcov$ 
+%\end{algorithmic}
+%\end{algorithm}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Equipped with a set of root paths and the corresponding goal regions they cover, we now need to allow for efficient replanning. This is done by using the following two observations:
+So far we explained the algorithm for one-time planning when the robot is at \Shome ($t = 0$); we now need to allow for efficient replanning for any state $s$ between $t = 0$ to $\Trc$. In order to do so, we iterate through all the states on these root paths and add additional root paths so that these states also cover their respective reachable goals. This has to be done recursively since newly added paths generate new states which the robot may have to replan from. The complete process is detailed in Alg.~\ref{alg:preprocess}. The algorithm is initially called for arguments ($\Shome, \Gfull, \emptyset$) and it runs recursively until no state is left with uncovered reachable goals.
+%
+% Explaining pseudo code
+
+At a high level, the algorithm iterates through each root path $\Pi_i$ (loop at line~\ref{loop1}) and for each state $s \in \Pi_i$ (loop at line~\ref{loop2}) the algorithm calls itself recursively (line~\ref{recursion}). The algorithm terminates when all states cover their reachable goals. The pseudocode in blue constitute an additional optimization step which we call ``latching" and is explained later in Sec.~\ref{latching}.
+%
+
+In order to minimise the required computation, the algorithm leverages two key observations:
+
 \begin{enumerate}[label={\textbf{O\arabic*}},leftmargin=0.75cm]
-    \item \label{obs:1} 
-    Assume that $\calR$ is executing a path $\Pi_i$ to $g_i \in G_i$ and that $\Pi_{s, i \rightarrow j}$ is a path starting at state $s \in \Pi_i$ and ending at goal $g_j \in \Gfull \setminus G_i$.
-    If the last update given by $\calP$ happens $\Tbound + \delta_t$ before $s$ is reached,
-    then the system can execute path $\Pi_i$ until $s$ and then continue executing $\Pi_{s, i \rightarrow j}$ to reach  $g_j$.
-
-    \item \label{obs:2} 
-    Assume that $\calR$ is executing a path $\Pi_i$ to $g_i \in G_i$ and that $\pi_{s,s',i \rightarrow j}$ is a path connecting  $s \in \Pi_i$ to $s' \in \Pi_j$ (with~$\Pi_j$ the root path to $g_j \in G_j$).
-    If the last update given by~$\calP$ happens $\Tbound + \delta_t$ before~$s$ is reached,
-    and the new goal is in $G_j$,
-    then the system can execute path~$\Pi_i$ until~$s$, execute $\pi_{s,s',i \rightarrow j}$ and then continue executing~$\Pi_{j}$ from~$s'$ until the goal is reached.
-
-    %\os{do we need to add a figure???}
+	\item \label{obs:1}
+	If a goal is not reachable from a state $s \in \Pi$, it is not reachable from all the states proceeding it on $\Pi$
+	\item \label{obs:2}
+	If a goal is covered by a state $s \in \Pi$, it is also covered by all states preceeding it on $\Pi$
 \end{enumerate}
+
+%O1 usage
+We use \ref{obs:1} to initialize the uncovered set for any state; instead of attempting to cover the entire \Gfull for each replanable state~$s$, the algorithm only attempts to cover the goals that could be reachable from $s$, thereby saving computation.
+%
+% O2 usage
+\ref{obs:2} is used by iterating backwards on each root path (loop at line~\ref{loop2}) and for each state on the root path only considering the goals that are left uncovered by its proceeding states on that root path.
+
+Specifically, using \ref{obs:2}, a single set $\Guncov_i$ is initialized for all states on $\Pi_i$ and the goals that each $s \in \Pi_i$ covers are removed from it in every iteration.  Using \ref{obs:1}, $\Guncov_i$ is initialized only with the goals covered by \Sstart (line~\ref{uncov_init}). $G_i$ is excluded since it is already covered via $\Pi_i$. The iteration completes either when all goals in $\Guncov_i$ are covered (line~\ref{terminate}) or the loop backtracks to \Sstart.
+
+Thus, as the outcome of the preprocessing stage a map $\calM: S \times \Gfull \rightarrow \{ \Pi_1, \Pi_2, \ldots \}$ is constructed mapping which root path can be as an experience to plan to a goal $g$ from a state $s$ within \Tbound.
+
+%This is done by using the following two observations:
+%\begin{enumerate}[label={\textbf{O\arabic*}},leftmargin=0.75cm]
+%    \item \label{obs:1} 
+%    Assume that $\calR$ is executing a path $\Pi_i$ to $g_i \in G_i$ and that $\Pi_{s, i \rightarrow j}$ is a path starting at state $s \in \Pi_i$ and ending at goal $g_j \in \Gfull \setminus G_i$.
+%    If the last update given by $\calP$ happens $\Tbound + \delta_t$ before $s$ is reached,
+%    then the system can execute path $\Pi_i$ until $s$ and then continue executing $\Pi_{s, i \rightarrow j}$ to reach  $g_j$.
+%
+%    \item \label{obs:2} 
+%    Assume that $\calR$ is executing a path $\Pi_i$ to $g_i \in G_i$ and that $\pi_{s,s',i \rightarrow j}$ is a path connecting  $s \in \Pi_i$ to $s' \in \Pi_j$ (with~$\Pi_j$ the root path to $g_j \in G_j$).
+%    If the last update given by~$\calP$ happens $\Tbound + \delta_t$ before~$s$ is reached,
+%    and the new goal is in $G_j$,
+%    then the system can execute path~$\Pi_i$ until~$s$, execute $\pi_{s,s',i \rightarrow j}$ and then continue executing~$\Pi_{j}$ from~$s'$ until the goal is reached.
+%
+%    %\os{do we need to add a figure???}
+%\end{enumerate}
 
 %\subsubsection{Procrastination is a bliss}
 %Recall that in the straw man algorithm presented in Sec.~\ref{subsec:strawman}, given a path $\Pi$ connecting \Shome to some goal $g$, we computed a path to every goal state $\Gfull \setminus \{g\}$ from all replanable states.
 %
+
+\ignore{
 \ref{obs:1} implies that if we can cover a goal state $g'$  by some state~$s$ along $\Pi_g$ (with $g \neq g'$), then we cover $g'$ by all states $\Pi$ that occur before~$s$.
 %
 \ref{obs:2} implies that if we can compute a path connecting one root path to some other root path, a process we term as ``latching'' on to the new path, then the new root path can be used to reach all its associated goal states.
@@ -659,9 +725,7 @@ If not, let $\Guncovp(\Trc)$ be all the states still uncovered.
 We consider the state $s_{\Pi_i, \Trc-\delta_t}$ (the state on $\Pi_j$ that is $\Trc-\delta_t$ away from \Shome) and recursively run our algorithm where the start state is $s_{\Pi_i, \Trc-\delta_t}$ and the goal region is $\Guncovp(\Trc)$.
 This process is repeated until either all states are covered or we backtracked to $s_{\Pi_i, 0}$ i.e the first state on $s_{\Pi_i}$.
 See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respectively.
-
-Thus, the outcome of the preprocessing stage is map $\calM: S \times \Gfull \rightarrow \{ \Pi_1, \Pi_2, \ldots \}$ mapping which root path can be as an experience to reach a goal $g$ from a state $s$.
-
+}
 
 
 
@@ -734,10 +798,16 @@ Thus, the outcome of the preprocessing stage is map $\calM: S \times \Gfull \rig
     using newly-computed root paths. 
     }
     \label{fig:pl}
-    \vspace{-5mm}
+    %\vspace{-5mm}
 \end{figure*}
 
 \subsubsection{Query}
+Alg.~\ref{alg:query} describes the query phase of our algorithm. Again, the code in blue correspond to the blue code in Alg.~\ref{alg:preprocess} for the additional optimization step which is explained in Sec.~\ref{latching}.
+Assume that the robot was at a state~$s_{\textrm{curr}}$ while executing a path~$\pi_{\rm curr}$ when it receives a pose update~$g$ from the perception system. Alg.~\ref{alg:query} will be called for a state \Sstart that is \Tbound ahead of~$s_{\textrm{curr}}$ along $\pi_{\rm curr}$, allowing the algorithm to return a plan before the robot reaches \Sstart.
+
+Alg.~\ref{alg:preprocess} assures that there exists one state on~$\pi_{\rm curr}$ between \Sstart and the state at \Trc that covers $g$. Therefore, we iterate through each~$s \in \pi_{\rm curr}$ backwards (similar to Alg.~\ref{alg:preprocess}) between \Sstart and the state at \Trc and find the one that covers $g$ by quering~$\calM$. Once found, we use the corresponding root path $\Pi_{\rm next}$ as an experience to find the path $\pi_{\rm next}$ from $s$ to $g$. Finally the paths $\pi_{\rm curr}$ and $\pi_{\rm next}$ are merged together with $s$ being the transitioning state to return the final path $\pi$. 
+
+\ignore{
 In the query stage, given an initial estimation $g_{\rm init}$ of the goal pose from $\calP$, our algorithm queries $\calM$ to obtain the root path $\Pi$ from $\Shome$ to $g_{\rm init}$.
 It then plans a path using $\Pi$ as an experience and starts executing this path.
 %
@@ -758,65 +828,87 @@ See Alg.~\ref{alg:query}, lines~\ref{alg:query:line:c3a}-\ref{alg:query:line:c3b
 If neither hold, we consider the state $s_{\Pi_{\rm curr}, \Trc-\delta_t}$ and repeat this process.
 %
 For pseudocode describing our approach see~\ref{alg:query}.
+}
 
 \begin{algorithm}[t]
-\caption{\textsc{Query}($g, \pi_{\textrm{curr}},s_{\textrm{start}}$)}\label{alg:query}  
+\caption{Query}\label{alg:query}  
     \AlgFontSize
+\hspace*{\algorithmicindent} \textbf{Inputs:} $\calM, \Shome$
 \begin{algorithmic}[1]
-    \State $s_{\rm first} \leftarrow \textsc{Head}  \pi_{\textrm{curr}}$ 
-        \Comment{First state on $ \pi_{\textrm{curr}}$}
-        \label{alg:query:line:c1a}
-    \State $\Pi_{\textrm{curr}} \leftarrow$ $\calM(s_{\textrm{start}},g)$ 
-         \Comment{Lookup root path from $s_{\textrm{start}}$ to $g$}
-    \State $\pi \leftarrow$ \textsc{Plan}($s_{\textrm{start}},g,\Pi_{\textrm{curr}}$)
-        \Comment{Plan using root path as experience}
-    \If{$\pi \neq  = \emptyset$}
-        \State \textbf{return} $\pi$
-        \label{alg:query:line:c1b}
-    \EndIf
-\vspace{2mm}
-
-\State $t \leftarrow \Trc$; \hspace{3mm} $t_{\textrm{curr}}\leftarrow \textsc{CurrentTime} + \Tbound$
-\While{$t \geq t_{\textrm{curr}}$}
-    \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
-        \Comment{Get state on path at time $t$}
-        \label{alg:query:line:c2a}
-    \State $\Pi_{\textrm{next}} \leftarrow$ $\calM(s,g)$ 
-         \Comment{Lookup root path from $s$ to $g$}
-    \If{$\Pi_{\textrm{next}} \neq \emptyset$}
-        \State $\pi_{\textrm{next}} \leftarrow$\textsc{Plan}($s_{\textrm{start}},g,\Pi_{\textrm{next}}$)
-         \Comment{Plan using root path as experience}
-        \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}},t$)
-        \State \textbf{return} $\pi$
-        \label{alg:query:line:c2b}
-    \EndIf
-%%%%%%%%%%%%%%%%LATCHING 
-
-\vspace{2mm}
-
-%    {\color{blue}
-    \State $\Pi_{\textrm{home}} \leftarrow \calM (\Shome,g)$
-     \Comment{Lookup root path from  to $g$}
-     \label{alg:query:line:c3a}
-    \If{$\Pi_{\textrm{home}} \neq \emptyset$}
+\Procedure{PlanPathByLatching}{$\Sstart,g$}
+\If{$\Pi_{\textrm{home}} \leftarrow \calM (\Shome,g)$ exists} \Comment{lookup root path}
         \If{\textsc{CanLatch}($s,\Pi_{\textrm{home}}$)}
-            \State $\pi_{\textrm{home}} \leftarrow$\textsc{Plan}($s_{\textrm{start}},g,\Pi_{\textrm{home}}$)
-            \Comment{Plan using root path}
-            \State $\pi \leftarrow$ \textsc{MergePathsByLatching}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, t$)
+            \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g,\Pi_{\textrm{home}}$)
+            \State $\pi \leftarrow$ \textsc{MergePathsByLatching}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
             \State \textbf{return} $\pi$
             \label{alg:query:line:c3b}
         \EndIf
     \EndIf
- %  }
-%%%%%%%%%%%
-    \State $t \leftarrow t - \delta_t$
-\EndWhile
 \State \textbf{return failure}
+\EndProcedure
+\vspace{2mm}
+\Procedure{Query}{$g, \pi_{\textrm{curr}},s_{\textrm{start}}$}
+%\State $t \leftarrow \Trc$; \hspace{3mm} $t_{\textrm{curr}}\leftarrow \textsc{CurrentTime} + \Tbound$
+%\While{$t \geq t_{\textrm{curr}}$}
+	\For {\textbf{each} $s \in \pi_{\textrm{curr}}$ (from last to $\Sstart$)} \Comment{states up to $\Trc$}
+%    \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
+%        \Comment{Get state on path at time $t$}
+        \label{alg:query:line:c2a}
+    %\State $\Pi_{\textrm{next}} \leftarrow$ $\calM(s,g)$ 
+         
+    \If{$\Pi_{\textrm{next}} \leftarrow$ $\calM(s,g)$ exists} \Comment{lookup root path}
+        \State $\pi_{\textrm{next}} \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g,\Pi_{\textrm{next}}$)
+        \State $\pi \leftarrow$ \textsc{MergePaths}($\pi_{\textrm{curr}},\pi_{\textrm{next}},s$)
+        \State \textbf{return} $\pi$
+        \label{alg:query:line:c2b}
+    \EndIf
+%%%%%%%%%%%%%%%%LATCHING 
+%
+%\vspace{2mm}
+%
+%    {\color{blue}
+%    \State $\Pi_{\textrm{home}} \leftarrow \calM (\Shome,g)$
+%     \Comment{Lookup root path from  to $g$}
+     %\label{alg:query:line:c3a}
+	\textcolor{blue}{
+	\If {$\pi \leftarrow $\textsc{PlanPathByLatching}($\Sstart,g$) \textbf{successful}}
+		\State \textbf{return} $\pi$
+	\EndIf
+	}
+%%%%%%%%%%%
+   % \State $t \leftarrow t - \delta_t$
+%\EndWhile
+
+\EndFor
+%}
+	\State \textbf{return failure} \Comment{goal is not reachable}
+\EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
+%%%%%%%%%%%%%%%%%%%%%LATCHING QUERY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{algorithm}[t]
+%\caption{\textsc{PlanPathByLatching}($\Sstart,g$)}\label{alg:latch_preprocess}
+%    \AlgFontSize
+%\begin{algorithmic}[1]
+%\State \textbf{Inputs:} $\Shome,\calM$
+%\If{$\Pi_{\textrm{home}} \leftarrow \calM (\Shome,g)$ exists} \Comment{lookup root path}
+%        \If{\textsc{CanLatch}($s,\Pi_{\textrm{home}}$)}
+%            \State $\pi_{\textrm{home}} \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g,\Pi_{\textrm{home}}$)
+%            \State $\pi \leftarrow$ \textsc{MergePathsByLatching}($\pi_{\textrm{curr}},\pi_{\textrm{home}}, s$)
+%            \State \textbf{return} $\pi$
+%            \label{alg:query:line:c3b}
+%        \EndIf
+%    \EndIf
+%\State \textbf{return failure}
+%\end{algorithmic}
+%\end{algorithm}
 
-
+\subsubsection{Latching: Reusing Root Paths}
+\label{latching}
+We introduce an additional step called ``Latching" to minimise the number of root paths computed in the preprocessing phase~\ref{alg:latch_preprocess}. With latching, the algorithm tries to reuse previously computed root paths as much as possible.
 
 \subsection{Theoretical guarantees}
 
@@ -946,7 +1038,7 @@ While executing the plan, if we obtain an updated pose estimate, the execution i
     \includegraphics[width=0.5\textwidth]{figs/timeline2.pdf}
     \caption{\CaptionTextSize Timeline of the sense-plan-act cycle.}
     \label{fig:tl}
-    \vspace{-5mm}
+    %\vspace{-5mm}
 \end{figure}
 
 \subsubsection{Goal region specification}
@@ -1028,7 +1120,7 @@ E3   & 34.61                                                                    
 \end{tabular}
 \caption{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate}
 \label{tab:robot_results}
-\vspace{-5mm}
+%\vspace{-5mm}
 \end{table}
 
 \ignore{
@@ -1136,7 +1228,7 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 
 %% Use plainnat to work nicely with natbib. 
 
-\newpage
+%\newpage
 \bibliographystyle{plainnat}
 \bibliography{references}
 
