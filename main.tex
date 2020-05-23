@@ -139,7 +139,9 @@ Conveyor belts are widely used in automated distribution, warehousing, as well a
 
 
 %% why replanning?
-    Manipulation relies on high quality detection and localization of moving objects. When the object first enters the field of view of the robot, the initial perception estimates of the object's pose are often inaccurate. Consider the example of an object (sugar box) moving along the conveyor towards the robot in Fig.~\ref{fig:intro_pic}, shown through an image sequence as captured by the robot's Kinect camera in Fig.~\ref{fig:pose_sequence}. In order to understand how pose estimation error varies as the object gets closer, we filter the input point cloud and remove all points lying outside the conveyor. We then compute the pair-wise minimum distance between the input point cloud and a predicted point cloud that corresponds to the object's 3D model transformed with the predicted pose through ICP~\cite{besl1992method} refinement. The plot in Fig.~\ref{fig:pose_sequence} shows the variation of the average pairwise minimum distance between the two point clouds as the object gets closer. We can observe that the distance decreases as the object moves closer, indicating that the point clouds overlap more closely due to more accurate pose estimates closer to the camera.
+    Manipulation relies on high quality detection and localization of moving objects. When the object first enters the field of view of the robot, the initial perception estimates of the object's pose are often inaccurate. Consider the example of an object (sugar box) moving along the conveyor towards the robot in Fig.~\ref{fig:intro_pic}, shown through an image sequence as captured by the robot's Kinect camera in Fig.~\ref{fig:pose_sequence}. 
+    % In order to understand how pose estimation error varies as the object gets closer, we filter the input point cloud and remove all points lying outside the conveyor. 
+    In order to understand how pose estimation error varies as the object gets closer, we compute the pair-wise minimum distance between the filtered input point cloud containing points corresponding to the object and a predicted point cloud that corresponds to the object's 3D model transformed with the predicted pose through ICP~\cite{besl1992method} refinement. The plot in Fig.~\ref{fig:pose_sequence} shows the variation of the average pairwise minimum distance as the object gets closer. We can observe that the distance decreases as the object moves closer, indicating that the point clouds overlap more closely due to more accurate pose estimates closer to the camera.
     
 % The black color denotes points corresponding to the object in the observed scene after filtering out all points lying outside the conveyor. The white point cloud shows the object's 3D model transformed with the predicted 3-Degree of Freedom pose obtained by using Iterative Closest Point (ICP)~\cite{besl1992method} refinement. Upon observation of the overlap between the point clouds, we see that they begin to overlap more closely as the object moves towards the robot, indicating that the pose estimate is becoming increasingly accurate. 
 However, if the robot waits too long to get an accurate estimate of the object pose, the delay in starting plan execution could cause the robot to miss the object. The likelihood of this occurring increases proportionately with the speed of the conveyor. Therefore, the robot should start executing a plan computed for the initial pose and as it gets better estimates, it should repeatedly replan for the new goals. However, for every replanning query, the time window for the pickup shrinks. This makes the planner's job difficult to support real-time planning.
@@ -1057,13 +1059,25 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 
 \subsection{Experimental setup}
 \subsubsection{Perception system~$\calP$}
-In order to pick a known object $o$ moving object along the conveyor~$\calB$, we need a method to estimate its 3-DoF pose at various locations across~$\calB$. Thus, we created an ICP-based pose estimation strategy that uses the known 3D model of~$o$ and the initial pose estimate obtained after pre-processing the input point cloud. 
+In order to pick a known object $o$ moving object along the conveyor~$\calB$, we need a method to estimate its 3-DoF pose at various locations across~$\calB$. Thus, we use an ICP-based pose estimation strategy that uses the known 3D model of~$o$ and the initial pose estimate obtained after pre-processing the input point cloud. The pre-processing step involves removal of all points that lie outside $\calB$, yielding only points corresponding to the object of interest. 
+The mean of the remaining points is then used as an initial translation estimate for ICP. 
+The rotation estimate is applied in a way that it places the object parallel to its direction of motion along the conveyor. 
+The object's 3D model is transformed with this initial estimate and ICP refinement is performed between the resulting point cloud and the pre-processed observed point cloud. 
+% The resulting transform is concatenated with the initial estimate to return the final predicted pose. 
+% For speeding up ICP, we downsample all point clouds to a leaf size of 15mm.
 %
-The following process is performed at every frame obtained by $\calP$. 
-We start by removing all points that lie outside $\calB$ which yields only points corresponding to the object of interest. 
-This is followed by statistical outlier removal in order to remove any points that have been left in scene after the first step. 
-In the final step, we compute the mean of the points left and use that as an initial translation estimate for ICP. 
-The rotation estimate is applied in a way that it places the object parallel to its direction of motion along the conveyor. The object's 3D model is transformed with this initial estimate, creating a point cloud and ICP refinement is performed between this point and the pre-processed observed point cloud. The resulting transform is concatenated with the initial estimate to return the final predicted pose. For speeding up ICP, we downsample all point clouds to a leaf size of 15mm.
+% The following process is performed at every frame obtained by $\calP$. 
+% We start by removing all points that lie outside $\calB$ which yields only points corresponding to the object of interest. 
+% This is followed by statistical outlier removal in order to remove any points that have been left in scene after the first step. 
+% In the final step, we compute the mean of the points left and use that as an initial translation estimate for ICP. 
+% The rotation estimate is applied in a way that it places the object parallel to its direction of motion along the conveyor. The object's 3D model is transformed with this initial estimate, creating a point cloud and ICP refinement is performed between this point and the pre-processed observed point cloud. The resulting transform is concatenated with the initial estimate to return the final predicted pose. For speeding up ICP, we downsample all point clouds to a leaf size of 15mm.
+% In order to pick a known object $o$ moving object along the conveyor~$\calB$, we need a method to estimate its 3-DoF pose at various locations across~$\calB$. Thus, we created an ICP-based pose estimation strategy that uses the known 3D model of~$o$ and the initial pose estimate obtained after pre-processing the input point cloud. 
+% %
+% The following process is performed at every frame obtained by $\calP$. 
+% We start by removing all points that lie outside $\calB$ which yields only points corresponding to the object of interest. 
+% This is followed by statistical outlier removal in order to remove any points that have been left in scene after the first step. 
+% In the final step, we compute the mean of the points left and use that as an initial translation estimate for ICP. 
+% The rotation estimate is applied in a way that it places the object parallel to its direction of motion along the conveyor. The object's 3D model is transformed with this initial estimate, creating a point cloud and ICP refinement is performed between this point and the pre-processed observed point cloud. The resulting transform is concatenated with the initial estimate to return the final predicted pose. For speeding up ICP, we downsample all point clouds to a leaf size of 15mm.
 
 \subsubsection{Sense-plan-act cycle}
 We follow the classical sense-plan-act cycle as depicted in Fig.~\ref{fig:tl}.
