@@ -253,11 +253,11 @@ To formalize this idea, let us introduce the notion of a \emph{reachable} state:
     A goal pose $g \in \Gfull$ is said to be \emph{reachable} from a state $s$ if there exists a path from $s$ to $g$ and it can be computed in finite time.
 \end{definition}
 
-Given a state $s$ we denote the set of all goals that are reachable from $s$ as $G^{\rm reach}(s)$ and we say that $G^{\rm reach}(s)$ is \emph{reachable} from $s$.
+%Given a state $s$ we denote the set of all goals that are reachable from $s$ as $G^{\rm reach}(s)$ and we say that $G^{\rm reach}(s)$ is \emph{reachable} from $s$.
 
 \begin{definition}
     A reachable pose $g \in \Gfull$ is said to be \emph{covered} by a state $s$ if 
-    the system can plan a path from $s$ to $g$ within time~\Tbound.
+    the planner can find a path from $s$ to $g$ within time~\Tbound.
 \end{definition}
 
 Thus, we wish to build a system such that 
@@ -316,13 +316,14 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
 \subsection{Straw man approach}
 \begin{figure}[t]
     \centering
+    \hspace{3mm}
     \begin{subfigure}{.225\textwidth}
     %   \centering
         \includegraphics[width=0.9\textwidth]{naive1}
         \caption{}
         \label{fig:naive1}
     \end{subfigure}
-    \hfill
+    %\hfill
     \begin{subfigure}{0.225\textwidth}
     %   \centering
         \includegraphics[width=0.9\textwidth]{naive2}
@@ -331,44 +332,42 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     \end{subfigure}
     \caption{
     \CaptionTextSize
-    The two steps of the preprocessing stage of the straw man algorithm. In both figures, paths that are very similar (and their corresponding goal states) are depicted using the same color.
-    (\subref{fig:naive1})~First step---the algorithm computes a path from \Shome to every state in \Gfull.
-    %
-    (\subref{fig:naive2})~Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. 
-    This is repeated recursively for the new paths but not visualized.}
+    The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta t$
+    (\subref{fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths that is from \Shome to every $g \in \Gfull$.
+    (\subref{fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull$ (here we only show paths from three states).
+    Thus, the number of paths increasing exponentially at every timestep.
+    }
     \label{fig:naive}
     %\vspace{-5mm}
 \end{figure}
 
-We divide the preprocessing stage into two steps.
-In the first step, we compute from \Shome a path $\Pi_g$ to every reachable $g \in \Gfull$. 
+We first compute from \Shome a path $\pi_g$ to every reachable $g \in \Gfull$. 
 %(such a path exists following \ref{assum:1}).
-. Thus, all goal states are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
-However, we need to allow for updated pose estimations while executing~$\Pi_g$. 
-
+Thus, all goal states are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
+However, we need to account for pose update while executing~$\pi_g$. 
 %
 Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time~\Trc.
-Thus, we discretize each path such that consecutive states along the path are no more than $\delta _t$ time apart. As we will see, this will allow the system to start executing a new path within $\Tbound + \delta_t$ after a new pose estimation is obtained from $\calP$.
+Thus, we discretize each path uniformly with resolution $\delta t$. As we will see, this will allow the system to start executing a new path within $\Tbound + \delta_t$ after a new pose estimation is obtained from $\calP$.
 %
 We call all states that are less than \Trc time from \Shome \emph{replanable states}.
 
 
-In the second step of the preprocessing stage, for every replanable state along each path $\Pi_g$, we compute a new path to all goal states. 
+Next, for every replanable state along each path $\pi_g$, we compute a new path to all goal states. 
 %\bound{that are $\varepsilon_\calP$ away from $g$}.
 See Fig.~\ref{fig:naive}.
 %
-This will ensure that all goal states are covered by the replanabale states that were introduced in the first step of the preprocessing stage. Namely, it will allow to immediately start executing a new path once the goal location is updated by~$\calP$.
+This will ensure that all goal states are covered by the all replanable states. Namely, it will allow to immediately start executing a new path once the goal location is updated by~$\calP$.
 %
 Unfortunately,~$\calP$ may update the goal location more than once. Thus, this process needs to be performed recursively for the new paths as well.
 
 
 The outcome of the preprocessing stage is a set of precomputed collision-free paths starting at states that are at most $\Trc$ from \Shome and end at goal states.
-The paths are stored in a lookup table that can be queried in $O(1) < \Tbound$ time.
+The paths are stored in a lookup table $\calM: S \times \Gfull \rightarrow \{ \pi_1, \pi_2, \ldots \}$ that can be queried in $O(1) (< \Tbound)$ time to find a path from any given $s \in S$ to $g \in \Gfull$.
 
 In the query stage we obtain an estimation $g_1$ of the goal pose by $\calP$. 
-The algorithm then retrieves the path~$\Pi_1(\Shome,g_1)$ from~\Shome to~$g_1$ and the robot starts executing~$\Pi_1(\Shome,g_1)$.
+The algorithm then retrieves the path~$\pi_1(\Shome,g_1)$ (from~\Shome to~$g_1$) from $\calM$ and the robot starts executing~$\Pi_1(\Shome,g_1)$.
 %
-For every new estimation $g_i$ of the goal pose obtained from~$\calP$  while the system is executing path $\Pi_{i-1}(s,g_{i-1})$, the algorithm retrieves from the lookup table the path $\Pi_i(s',g_i)$ from the first state~$s'$ along $\Pi_{i-1}(s,g_{i-1})$ that is $\Tbound + \delta_t$ time from~$s$. The robot~$\calR$ will then start executing~$\Pi_i(s',g_i)$ once it reaches~$s'$.
+For every new estimation $g_i$ of the goal pose obtained from~$\calP$  while the system is executing path $\pi_{i-1}(s,g_{i-1})$, the algorithm retrieves from $\calM$ the path $\pi_i(s',g_i)$ from the first state~$s'$ along $\pi_{i-1}(s,g_{i-1})$ that is least $\Tbound$ away from~$s$. The robot~$\calR$ will then start executing~$\pi_i(s',g_i)$ once it reaches~$s'$.
 
 Clearly, every state is covered by this brute-force approach, however it requires a massive amount of memory.
 Let $n_{\rm goal} = \vert \Gfull \vert$ be the number of goal states and
@@ -382,15 +381,19 @@ In the next sections, we show how we can dramatically reduce the memory footprin
 \subsection{Algorithmic approach}
 While the straw man algorithm presented  allows for planning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound, its memory footprint is prohibitively large.
 %
-We suggest to reduce the memory footprint by building on the observation that many paths to close-by goals traverse very similar parts of the configurations space (see Fig.~\ref{fig:naive}).
+We suggest to reduce the memory footprint by building on the observation that many paths to close-by goals traverse very similar parts of the configurations space.
 
-Similar to the straw man algorithm, our preprocessing stage runs in two steps.
-In the first step we  compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$. However, this is done by computing a set of so-called ``root paths'' $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to a subset of goals in \Gfull (here we will have that $k \ll n_{\rm goal})$. 
-As we will see, these paths will allow to efficiently compute paths to every goal state in the query stage and the system only needs to explicitly store these root paths in memory (and not a path to every goal state as in the straw man algorithm).
+%Similar to the straw man algorithm, our preprocessing stage runs in two steps.
+%In the first step we  compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$. However, this is done by computing a set of so-called ``root paths'' $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to a subset of goals in \Gfull (here we will have that $k \ll n_{\rm goal})$.
+
+The key idea of our approach is that instead of computing (and storing) paths to all reachable goals in \Gfull, we compute a relatively small subset of so-called ``root paths" that can be reused in such a way that we can still cover \Gfull fully. Namely, at query time, we can reuse these paths to plan to any $g\in \Gfull$ within \Tbound.
+
+
+First, we compute a set of root paths $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to cover \Gfull by \Shome (here we will have that $k \ll n_{\rm goal})$ 
 %
-In the second step of the preprocessing stage, the algorithm recursively computes for all replanabale states along all root paths a new path to each goal state. However, this is done by attempting to re-use previously-computed root paths which, in turn, allows for a very low memory footprint.
+Next, the algorithm recursively computes for all replanabale states along these root paths, additional root paths so that their reachable goals are also covered. However, this is done by attempting to re-use previously-computed root paths which, in turn, allows for a very low memory footprint.
 %
-It is important to note that replanable states are not only the ones that lie on the root paths from \Shome---whenever the recursion happens we compute a new set of root paths and generate new replanable states
+%It is important to note that replanable states are not only the ones that lie on the root paths from \Shome---whenever the recursion happens we compute a new set of root paths and generate new replanable states
 %
 The remainder of this section formalizes these ideas.
 
@@ -735,65 +738,87 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     \centering
     \begin{subfigure}{.225\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_1}
+        \includegraphics[width=\textwidth]{pre1}
+        \caption{}
+        \label{fig:pre1}
+    \end{subfigure}
+%    \hspace{1mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{pre2}
+        \caption{}
+        \label{fig:pre2}
+    \end{subfigure} 
+%    \hspace{1mm}
+    \begin{subfigure}{0.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{pre3}
+        \caption{}
+        \label{fig:pre3}
+    \end{subfigure}
+    %
+    \hspace{8mm}
+    \begin{subfigure}{.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{pre4}
+        \caption{}
+        \label{fig:pre4}
+    \end{subfigure}
+    \caption{\CaptionTextSize
+    Preprocess loop for $\Pi_1$ without latching.
+    (\subref{fig:pre1})~Initially the state $s$ covers $G_1$ via $\Pi_1$. 
+    %
+    (\subref{fig:pre2})~New root paths are computed from $s$ to cover remaining uncovered region.
+    %
+    (\subref{fig:pre3})~This process is repeated by backtracking along the root path.
+    %
+    (\subref{fig:pre4})~Outcome of a preprocessing step for one path: \Gfull is covered either by using $\Pi_1$ as an experience or by 
+    using newly-computed root paths. 
+    }
+    \label{fig:pl}
+    %\vspace{-5mm}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}{.225\textwidth}
+    %   \centering
+        \includegraphics[width=\textwidth]{Latching_1}
         \caption{}
         \label{fig:pl1}
     \end{subfigure}
-    \hspace{1mm}
+    %\hspace{1mm}
     \begin{subfigure}{0.225\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_2}
+        \includegraphics[width=\textwidth]{Latching_2}
         \caption{}
         \label{fig:pl2}
     \end{subfigure} 
-    \hspace{1mm}
+    %\hspace{1mm}
     \begin{subfigure}{0.225\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_3}
+        \includegraphics[width=\textwidth]{Latching_3}
         \caption{}
         \label{fig:pl3}
     \end{subfigure}
     %
-    \hspace{1mm}
+    \hspace{8mm}
     \begin{subfigure}{.225\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_4}
+        \includegraphics[width=\textwidth]{Latching_4}
         \caption{}
         \label{fig:pl4}
     \end{subfigure}
-    %\hspace{2mm}
-    \begin{subfigure}{0.225\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_5}
-        \caption{}
-        \label{fig:pl5}
-    \end{subfigure}
-    \hspace{1mm}
-    \begin{subfigure}{0.225\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_6}
-        \caption{}
-        \label{fig:pl6}
-    \end{subfigure}
-    \hspace{1mm}
-    \begin{subfigure}{0.225\textwidth}
-    %   \centering
-        \includegraphics[width=\textwidth]{3_preprocess_loop_7}
-        \caption{}
-        \label{fig:pl7}
-    \end{subfigure}
     \caption{\CaptionTextSize
-    Preprocess loop.
-    (\subref{fig:pl1})~We start by trying to latch on to every other root path. 
+    Preprocess loop for $\Pi_1$ with latching.
+    (\subref{fig:pl1})~The algorithm starts by trying to latch on to every other root path; for successful latches, the corresponding goal states are removed from uncovered region.
     %
-    (\subref{fig:pl2})~For successful latches, we add the corresponding goal states to our covered region.
+    (\subref{fig:pl2})~New root paths are computed from $s$ to cover remaining uncovered region.
     %
-    (\subref{fig:pl3})~We then try to compute new root path with its corresponding goal states (see also Fig.~\ref{fig:crp2}).
+    (\subref{fig:pl3})~This process is repeated by backtracking along the root path.
     %
-    (\subref{fig:pl4})-(\subref{fig:pl6})~This process is repeated by backtracking along the root path.
-    %
-    (\subref{fig:pl7})~Outcome of a preprocessing step for one path. \Gfull is covered either by using $\Pi_1$ as an experience, 
-    latching on to $\Pi_2$ or  $\Pi_3$ (at different time steps)
+    (\subref{fig:pl4})~Outcome of a preprocessing step: \Gfull is covered either by using $\Pi_1$ as an experience, 
+    latching on to $\Pi_2,\Pi_3$ or  $\Pi_4$ (at different time steps)
     or by 
     using newly-computed root paths. 
     }
@@ -908,16 +933,34 @@ For pseudocode describing our approach see~\ref{alg:query}.
 
 \subsubsection{Latching: Reusing Root Paths}
 \label{latching}
-We introduce an additional step called ``Latching" to minimise the number of root paths computed in the preprocessing phase~\ref{alg:latch_preprocess}. With latching, the algorithm tries to reuse previously computed root paths as much as possible.
+We introduce an additional step called ``Latching" to minimise the number of root paths computed in Alg.~\ref{alg:preprocess}. With latching, the algorithm tries to reuse previously computed root paths as much as possible using special motion primitives that allow transitions from one root path to another.
+The primitive is computed from a state $s \in \Pi_i$ to $s' \in \Pi_j$ such that $t(s') = t(s) + \delta t$ by simple interpolation while ensuring that kinodynamic constraints of the robot are satisfied. Specifically, given the nominal joint velocities of the robot if $s'$ can be reached in time $\delta t$, while respecting the kinematic and collision constraints, then the transition is allowed.
+
+In Alg.~\ref{alg:preprocess}, before calling the \textsc{Preprocess} procedure for a state, the algorithm removes the set of goals that can be covered via latching, thereby reducing the number of goals that need to be covered by the \textsc{Preprocess} procedure. Correspondingly, in Alg.~\ref{alg:query}, an additional procedure is called to check if the path can be found via latching. These additions in the two pseudocodes are shown in blue.
 
 \subsection{Theoretical guarantees}
 
-\begin{lemma}[Completeness]
-\label{lemma:completeness}
-Let $s$ be a state that $\calR$ is at in the query phase and $g\in \Gfull$ is a goal state.
-If~$g$ is reachable from a state $s'$ that is (i)~reachable from $s$ and (ii)~is \Tbound away from $s$ then the planner will compute a path to $g$.
+%\begin{lemma}[Completeness]
+%\label{lemma:completeness}
+%Let $s$ be a state that $\calR$ is at in the query phase and $g\in \Gfull$ is a goal state.
+%If~$g$ is reachable from a state $s'$ that is (i)~reachable from $s$ and (ii)~is \Tbound away from $s$ then the planner will compute a path to $g$.
+%\end{lemma}
+%We omit the proof due to lack of space.
+
+\begin{lemma}
+For a robot state~$s$ and a goal~$g$, if~$g$ is \emph{reachable} from~$s$ and~$t(s) \leq t_{rc}$, the algorithm is guaranteed to find a path from~$s$ to~$g$.
 \end{lemma}
-We omit the proof due to lack of space.
+
+\begin{proof}
+In order to prove it we show that (1) if~$g$ is reachable from~$s$, it is \emph{covered} by~$s$ in Alg.~\ref{alg:preprocess} and (2) if~$g$ is covered by~$s$, Alg.~\ref{alg:query} is guaranteed to return a path.
+
+Alg.~\ref{alg:preprocess} starts by computing a set of root paths from \Shome that ensures that it covers all of its reachable goals. It then iterates over all states on these paths and adds additional root paths ensuring that these states also cover their reachable goals. It does it recursively until no state before \Trc is left with uncovered goals. Therefore, it is ensured that any reachable $g$ is covered by $s$, provided that $t(s) \leq t_{rc}$. 
+    % \item Alg. 3, by construction, is guaranteed to cover~$g$ via at least one state on~$\Pi$ between~$s$ and the state at~$t_{rc}$ (inclusive) (While loop at line 9), provided~$g$ is reachable from~$s$ and~$t(s) \leq t_{rc}$.
+    
+Alg.~\ref{alg:preprocess} covers~$g$ via at least one state between~$s$ and the state at~$t_{rc}$ (inclusively) (loop at line~\ref{loop2}).
+In query phase, Alg.~\ref{alg:query} iterates through all states between~$s$ and the state at~$t_{rc}$ (inclusively) to identify the one that covers~$g$ (loop at line~\ref{alg:query:line:c2a}). Since~$g$ is covered by at least one of these states by Alg.~\ref{alg:preprocess}, Alg.~\ref{alg:query} is guaranteed to find a path from $s$ to $g$.
+
+\end{proof}
 
 \begin{lemma}[Constant-time planning]
 \label{lemma:bounded_time}
