@@ -23,6 +23,8 @@
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
 \newlabel{fig:intro_pic}{{1}{1}{\CaptionTextSize A scene demonstrating the PR2 robot picking up a moving object (sugar box) off a conveyor belt.\relax }{figure.caption.1}{}}
 \citation{allen1993automated,han2019toward,stogl2017tracking,zhang2018gilbreth}
+\citation{fraichard1993dynamic,cefalo2013task,yang2018planning}
+\citation{yang2018planning}
 \citation{cowley2013perception,menon2014motion}
 \citation{kavraki1996probabilistic}
 \citation{islam2019planning}
@@ -32,7 +34,6 @@
 \citation{DB14,SSAH14}
 \citation{ishida1991moving,ishida1995moving,koenig2007speeding,sun2010moving}
 \citation{KL06,KS09,korf1990real}
-\citation{JansonIP18}
 \newlabel{fig:obj1}{{2a}{2}{\relax }{figure.caption.2}{}}
 \newlabel{sub@fig:obj1}{{a}{2}{\relax }{figure.caption.2}{}}
 \newlabel{fig:obj2}{{2b}{2}{\relax }{figure.caption.2}{}}
@@ -51,8 +52,8 @@
 \newlabel{sub@fig:naive1}{{a}{3}{\relax }{figure.caption.3}{}}
 \newlabel{fig:naive2}{{3b}{3}{\relax }{figure.caption.3}{}}
 \newlabel{sub@fig:naive2}{{b}{3}{\relax }{figure.caption.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  \relax \fontsize  {9}{10pt}\selectfont  The two steps of the preprocessing stage of the straw man algorithm. In both figures, paths that are very similar (and their corresponding goal states) are depicted using the same color. (\subref  {fig:naive1})\nobreakspace  {}First step---the algorithm computes a path from \ensuremath  {s_{\textrm  {home}}}\xspace  to every state in \ensuremath  {G^{\textrm  {full}}}\xspace  . (\subref  {fig:naive2})\nobreakspace  {}Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. This is repeated recursively for the new paths but not visualized.\relax }}{3}{figure.caption.3}}
-\newlabel{fig:naive}{{3}{3}{\CaptionTextSize The two steps of the preprocessing stage of the straw man algorithm. In both figures, paths that are very similar (and their corresponding goal states) are depicted using the same color. (\subref {fig:naive1})~First step---the algorithm computes a path from \Shome to every state in \Gfull . (\subref {fig:naive2})~Second step---the algorithm computes for each path a new path to each goal state for every state along the path. Here, one representative path is depicted together with three different goal states. This is repeated recursively for the new paths but not visualized.\relax }{figure.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces  \relax \fontsize  {9}{10pt}\selectfont  The figures show paths discretized from timesteps $t_0$ to $\ensuremath  {t_{\textrm  {rc}}}\xspace  $ with steps of size $\delta t$ (\subref  {fig:naive1})\nobreakspace  {}At $t_0$, the algorithm computes $n_{\rm  goal}$ paths that is from \ensuremath  {s_{\textrm  {home}}}\xspace  to every $g \in \ensuremath  {G^{\textrm  {full}}}\xspace  $. (\subref  {fig:naive2})\nobreakspace  {}At $t_1$, the algorithm computes $n_{\rm  goal}^2$ paths that is from all $n_{\rm  goal}$ replanable states at $t_1$ to every $g \in \ensuremath  {G^{\textrm  {full}}}\xspace  $ (here we only show paths from three states). Thus, the number of paths increasing exponentially at every timestep. \relax }}{3}{figure.caption.3}}
+\newlabel{fig:naive}{{3}{3}{\CaptionTextSize The figures show paths discretized from timesteps $t_0$ to $\Trc $ with steps of size $\delta t$ (\subref {fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths that is from \Shome to every $g \in \Gfull $. (\subref {fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull $ (here we only show paths from three states). Thus, the number of paths increasing exponentially at every timestep. \relax }{figure.caption.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}Algorithmic framework}{3}{section.4}}
 \newlabel{subsec:strawman}{{IV}{3}{Algorithmic framework}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-A}}Straw man approach}{3}{subsection.4.1}}
@@ -62,9 +63,9 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-B}}Algorithmic approach}{4}{subsection.4.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-C}}Algorithmic building blocks}{4}{subsection.4.3}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-C}1}Motion planner}{4}{subsubsection.4.3.1}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-C}2}Planning with Experience Reuse}{4}{subsubsection.4.3.2}}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Plan Root Paths\relax }}{5}{algorithm.1}}
 \newlabel{alg:step1}{{1}{5}{Plan Root Paths\relax }{algorithm.1}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-C}2}Planning using experiences}{5}{subsubsection.4.3.2}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}}Algorithmic details}{5}{subsection.4.4}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}1}Preprocessing}{5}{figure.caption.4}}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Preprocess\relax }}{5}{algorithm.2}}
@@ -86,76 +87,82 @@
 \newlabel{sub@fig:crp3}{{c}{6}{\relax }{figure.caption.4}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  First step of the preprocessing stage. (\subref  {fig:crp1})\nobreakspace  {}A goal state $g_1$ is sampled and the root path $\Pi _1$ is computed between \ensuremath  {s_{\textrm  {home}}}\xspace  and $g_1$. (\subref  {fig:crp2})\nobreakspace  {}The set $G_1 \subset \ensuremath  {G^{\textrm  {full}}}\xspace  $ of all states that can use $\Pi _1$ as an experience is computed and associated with $\Pi _1$. (\subref  {fig:crp3})\nobreakspace  {}The goal region covered by four root paths from \ensuremath  {s_{\textrm  {home}}}\xspace  after the first step of the preprocessing stage terminates. \relax }}{6}{figure.caption.4}}
 \newlabel{fig:crp}{{4}{6}{\CaptionTextSize First step of the preprocessing stage. (\subref {fig:crp1})~A goal state $g_1$ is sampled and the root path $\Pi _1$ is computed between \Shome and $g_1$. (\subref {fig:crp2})~The set $G_1 \subset \Gfull $ of all states that can use $\Pi _1$ as an experience is computed and associated with $\Pi _1$. (\subref {fig:crp3})~The goal region covered by four root paths from \Shome after the first step of the preprocessing stage terminates. \relax }{figure.caption.4}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}2}Query}{6}{subsubsection.4.4.2}}
-\newlabel{latching}{{\unhbox \voidb@x \hbox {IV-D}3}{6}{Latching: Reusing Root Paths}{subsubsection.4.4.3}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}3}Latching: Reusing Root Paths}{6}{subsubsection.4.4.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-E}}Theoretical guarantees}{6}{subsection.4.5}}
-\newlabel{lemma:completeness}{{1}{6}{Completeness}{lemma.1}{}}
-\newlabel{lemma:bounded_time}{{2}{6}{Constant-time planning}{lemma.2}{}}
 \@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Query\relax }}{6}{algorithm.3}}
 \newlabel{alg:query}{{3}{6}{Query\relax }{algorithm.3}{}}
 \newlabel{alg:query:line:c3b}{{6}{6}{Query\relax }{algorithm.3}{}}
 \newlabel{alg:query:line:c2a}{{9}{6}{Query\relax }{algorithm.3}{}}
 \newlabel{alg:query:line:c2b}{{13}{6}{Query\relax }{algorithm.3}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Evaluation}{6}{section.5}}
-\newlabel{sec:eval}{{V}{6}{Evaluation}{section.5}{}}
-\newlabel{fig:pl1}{{5a}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl1}{{a}{7}{\relax }{figure.caption.5}{}}
-\newlabel{fig:pl2}{{5b}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl2}{{b}{7}{\relax }{figure.caption.5}{}}
-\newlabel{fig:pl3}{{5c}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl3}{{c}{7}{\relax }{figure.caption.5}{}}
-\newlabel{fig:pl4}{{5d}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl4}{{d}{7}{\relax }{figure.caption.5}{}}
-\newlabel{fig:pl5}{{5e}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl5}{{e}{7}{\relax }{figure.caption.5}{}}
-\newlabel{fig:pl6}{{5f}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl6}{{f}{7}{\relax }{figure.caption.5}{}}
-\newlabel{fig:pl7}{{5g}{7}{\relax }{figure.caption.5}{}}
-\newlabel{sub@fig:pl7}{{g}{7}{\relax }{figure.caption.5}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Preprocess loop. (\subref  {fig:pl1})\nobreakspace  {}We start by trying to latch on to every other root path. (\subref  {fig:pl2})\nobreakspace  {}For successful latches, we add the corresponding goal states to our covered region. (\subref  {fig:pl3})\nobreakspace  {}We then try to compute new root path with its corresponding goal states (see also Fig.\nobreakspace  {}\ref  {fig:crp2}). (\subref  {fig:pl4})-(\subref  {fig:pl6})\nobreakspace  {}This process is repeated by backtracking along the root path. (\subref  {fig:pl7})\nobreakspace  {}Outcome of a preprocessing step for one path. \ensuremath  {G^{\textrm  {full}}}\xspace  is covered either by using $\Pi _1$ as an experience, latching on to $\Pi _2$ or $\Pi _3$ (at different time steps) or by using newly-computed root paths. \relax }}{7}{figure.caption.5}}
-\newlabel{fig:pl}{{5}{7}{\CaptionTextSize Preprocess loop. (\subref {fig:pl1})~We start by trying to latch on to every other root path. (\subref {fig:pl2})~For successful latches, we add the corresponding goal states to our covered region. (\subref {fig:pl3})~We then try to compute new root path with its corresponding goal states (see also Fig.~\ref {fig:crp2}). (\subref {fig:pl4})-(\subref {fig:pl6})~This process is repeated by backtracking along the root path. (\subref {fig:pl7})~Outcome of a preprocessing step for one path. \Gfull is covered either by using $\Pi _1$ as an experience, latching on to $\Pi _2$ or $\Pi _3$ (at different time steps) or by using newly-computed root paths. \relax }{figure.caption.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Simulation results. Here $T_b$ denotes the (possibly arbitrary) timebound that the algorithm uses. Note that for our method $T_b = \ensuremath  {T_{\textrm  {bound}}}\xspace  $ is the time bound that the algorithm is ensured to compute a plan.\relax }}{7}{table.caption.6}}
-\newlabel{tab:sim_results}{{I}{7}{\CaptionTextSize Simulation results. Here $T_b$ denotes the (possibly arbitrary) timebound that the algorithm uses. Note that for our method $T_b = \Tbound $ is the time bound that the algorithm is ensured to compute a plan.\relax }{table.caption.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}2}Query}{6}{subsubsection.4.4.2}}
+\newlabel{latching}{{\unhbox \voidb@x \hbox {IV-D}3}{6}{Latching: Reusing Root Paths}{subsubsection.4.4.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {IV-D}3}Latching: Reusing Root Paths}{6}{subsubsection.4.4.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {IV-E}}Theoretical guarantees}{6}{subsection.4.5}}
+\newlabel{lemma:bounded_time}{{2}{6}{Constant-time planning}{lemma.2}{}}
+\newlabel{fig:pre1}{{5a}{7}{\relax }{figure.caption.5}{}}
+\newlabel{sub@fig:pre1}{{a}{7}{\relax }{figure.caption.5}{}}
+\newlabel{fig:pre2}{{5b}{7}{\relax }{figure.caption.5}{}}
+\newlabel{sub@fig:pre2}{{b}{7}{\relax }{figure.caption.5}{}}
+\newlabel{fig:pre3}{{5c}{7}{\relax }{figure.caption.5}{}}
+\newlabel{sub@fig:pre3}{{c}{7}{\relax }{figure.caption.5}{}}
+\newlabel{fig:pre4}{{5d}{7}{\relax }{figure.caption.5}{}}
+\newlabel{sub@fig:pre4}{{d}{7}{\relax }{figure.caption.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Preprocess loop for $\Pi _1$ without latching. (\subref  {fig:pre1})\nobreakspace  {}Initially the state $s$ covers $G_1$ via $\Pi _1$. (\subref  {fig:pre2})\nobreakspace  {}New root paths are computed from $s$ to cover remaining uncovered region. (\subref  {fig:pre3})\nobreakspace  {}This process is repeated by backtracking along the root path. (\subref  {fig:pre4})\nobreakspace  {}Outcome of a preprocessing step for one path: \ensuremath  {G^{\textrm  {full}}}\xspace  is covered either by using $\Pi _1$ as an experience or by using newly-computed root paths. \relax }}{7}{figure.caption.5}}
+\newlabel{fig:pl}{{5}{7}{\CaptionTextSize Preprocess loop for $\Pi _1$ without latching. (\subref {fig:pre1})~Initially the state $s$ covers $G_1$ via $\Pi _1$. (\subref {fig:pre2})~New root paths are computed from $s$ to cover remaining uncovered region. (\subref {fig:pre3})~This process is repeated by backtracking along the root path. (\subref {fig:pre4})~Outcome of a preprocessing step for one path: \Gfull is covered either by using $\Pi _1$ as an experience or by using newly-computed root paths. \relax }{figure.caption.5}{}}
+\newlabel{fig:pl1}{{6a}{7}{\relax }{figure.caption.6}{}}
+\newlabel{sub@fig:pl1}{{a}{7}{\relax }{figure.caption.6}{}}
+\newlabel{fig:pl2}{{6b}{7}{\relax }{figure.caption.6}{}}
+\newlabel{sub@fig:pl2}{{b}{7}{\relax }{figure.caption.6}{}}
+\newlabel{fig:pl3}{{6c}{7}{\relax }{figure.caption.6}{}}
+\newlabel{sub@fig:pl3}{{c}{7}{\relax }{figure.caption.6}{}}
+\newlabel{fig:pl4}{{6d}{7}{\relax }{figure.caption.6}{}}
+\newlabel{sub@fig:pl4}{{d}{7}{\relax }{figure.caption.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Preprocess loop for $\Pi _1$ with latching. (\subref  {fig:pl1})\nobreakspace  {}The algorithm starts by trying to latch on to every other root path; for successful latches, the corresponding goal states are removed from uncovered region. (\subref  {fig:pl2})\nobreakspace  {}New root paths are computed from $s$ to cover remaining uncovered region. (\subref  {fig:pl3})\nobreakspace  {}This process is repeated by backtracking along the root path. (\subref  {fig:pl4})\nobreakspace  {}Outcome of a preprocessing step: \ensuremath  {G^{\textrm  {full}}}\xspace  is covered either by using $\Pi _1$ as an experience, latching on to $\Pi _2,\Pi _3$ or $\Pi _4$ (at different time steps) or by using newly-computed root paths. \relax }}{7}{figure.caption.6}}
+\newlabel{fig:pl}{{6}{7}{\CaptionTextSize Preprocess loop for $\Pi _1$ with latching. (\subref {fig:pl1})~The algorithm starts by trying to latch on to every other root path; for successful latches, the corresponding goal states are removed from uncovered region. (\subref {fig:pl2})~New root paths are computed from $s$ to cover remaining uncovered region. (\subref {fig:pl3})~This process is repeated by backtracking along the root path. (\subref {fig:pl4})~Outcome of a preprocessing step: \Gfull is covered either by using $\Pi _1$ as an experience, latching on to $\Pi _2,\Pi _3$ or $\Pi _4$ (at different time steps) or by using newly-computed root paths. \relax }{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Evaluation}{7}{section.5}}
+\newlabel{sec:eval}{{V}{7}{Evaluation}{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-A}}Experimental setup}{7}{subsection.5.1}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}1}Perception system\nobreakspace  {}$\ensuremath  {\mathcal  {P}}\xspace  $}{7}{subsubsection.5.1.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Timeline of the sense-plan-act cycle.\relax }}{7}{figure.caption.8}}
+\newlabel{fig:tl}{{7}{7}{\CaptionTextSize Timeline of the sense-plan-act cycle.\relax }{figure.caption.8}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}2}Sense-plan-act cycle}{7}{subsubsection.5.1.2}}
-\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Timeline of the sense-plan-act cycle.\relax }}{7}{figure.caption.7}}
-\newlabel{fig:tl}{{6}{7}{\CaptionTextSize Timeline of the sense-plan-act cycle.\relax }{figure.caption.7}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-A}3}Goal region specification}{7}{subsubsection.5.1.3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  A depiction of \ensuremath  {G^{\textrm  {full}}}\xspace  -specification on a conveyor belt (overhead view) and perception noise handling. \relax }}{8}{figure.caption.8}}
-\newlabel{fig:pe}{{7}{8}{\CaptionTextSize A depiction of \Gfull -specification on a conveyor belt (overhead view) and perception noise handling. \relax }{figure.caption.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Simulation results. Here $T_b$ denotes the (possibly arbitrary) timebound that the algorithm uses. Note that for our method $T_b = \ensuremath  {T_{\textrm  {bound}}}\xspace  $ is the time bound that the algorithm is ensured to compute a plan.\relax }}{8}{table.caption.7}}
+\newlabel{tab:sim_results}{{I}{8}{\CaptionTextSize Simulation results. Here $T_b$ denotes the (possibly arbitrary) timebound that the algorithm uses. Note that for our method $T_b = \Tbound $ is the time bound that the algorithm is ensured to compute a plan.\relax }{table.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  A depiction of \ensuremath  {G^{\textrm  {full}}}\xspace  -specification on a conveyor belt (overhead view) and perception noise handling. \relax }}{8}{figure.caption.9}}
+\newlabel{fig:pe}{{8}{8}{\CaptionTextSize A depiction of \Gfull -specification on a conveyor belt (overhead view) and perception noise handling. \relax }{figure.caption.9}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\unhbox \voidb@x \hbox {V-B}}Results}{8}{subsection.5.2}}
 \newlabel{sec:robot_results}{{\unhbox \voidb@x \hbox {V-B}1}{8}{Real-robot experiments}{subsubsection.5.2.1}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-B}1}Real-robot experiments}{8}{subsubsection.5.2.1}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate\relax }}{8}{table.caption.9}}
-\newlabel{tab:robot_results}{{II}{8}{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate\relax }{table.caption.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces \relax \fontsize  {9}{10pt}\selectfont  Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate\relax }}{8}{table.caption.10}}
+\newlabel{tab:robot_results}{{II}{8}{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate\relax }{table.caption.10}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {\unhbox \voidb@x \hbox {V-B}2}Simulation experiments}{8}{subsubsection.5.2.2}}
 \bibstyle{plainnat}
 \bibdata{references}
 \bibcite{allen1993automated}{{1}{1993}{{Allen et~al.}}{{Allen, Timcenko, Yoshimi, and Michelman}}}
 \bibcite{BAG12}{{2}{2012}{{Berenson et~al.}}{{Berenson, Abbeel, and Goldberg}}}
 \bibcite{besl1992method}{{3}{1992}{{Besl and McKay}}{{}}}
-\bibcite{CCL10}{{4}{2010}{{Cohen et~al.}}{{Cohen, Chitta, and Likhachev}}}
-\bibcite{CSCL11}{{5}{2011}{{Cohen et~al.}}{{Cohen, Subramania, Chitta, and Likhachev}}}
-\bibcite{CSMOC15}{{6}{2015}{{Coleman et~al.}}{{Coleman, {\c {S}}ucan, Moll, Okada, and Correll}}}
-\bibcite{cowley2013perception}{{7}{2013}{{Cowley et~al.}}{{Cowley, Cohen, Marshall, Taylor, and Likhachev}}}
-\bibcite{DB14}{{8}{2014}{{Dobson and Bekris}}{{}}}
-\bibcite{han2019toward}{{9}{2019}{{Han et~al.}}{{Han, Feng, and Yu}}}
-\bibcite{ishida1991moving}{{10}{1991}{{Ishida and Korf}}{{}}}
-\bibcite{ishida1995moving}{{11}{1995}{{Ishida and Korf}}{{}}}
-\bibcite{islam2019planning}{{12}{2019}{{Islam et~al.}}{{Islam, Vemula, Kim, Dornbush, Salzman, and Likhachev}}}
-\bibcite{JansonIP18}{{13}{}{{Janson et~al.}}{{Janson, Ichter, and Pavone}}}
-\bibcite{kavraki1996probabilistic}{{14}{1996}{{Kavraki et~al.}}{{Kavraki, Svestka, Latombe, and Overmars}}}
-\bibcite{KL06}{{15}{2006}{{Koenig and Likhachev}}{{}}}
-\bibcite{KS09}{{16}{2009}{{Koenig and Sun}}{{}}}
-\bibcite{koenig2007speeding}{{17}{2007}{{Koenig et~al.}}{{Koenig, Likhachev, and Sun}}}
-\bibcite{korf1990real}{{18}{1990}{{Korf}}{{}}}
-\bibcite{LF09}{{19}{2009}{{Likhachev and Ferguson}}{{}}}
-\bibcite{menon2014motion}{{20}{2014}{{Menon et~al.}}{{Menon, Cohen, and Likhachev}}}
-\bibcite{PCCL12}{{21}{2012}{{Phillips et~al.}}{{Phillips, Cohen, Chitta, and Likhachev}}}
-\bibcite{pohl1970heuristic}{{22}{1970}{{Pohl}}{{}}}
-\bibcite{SSAH14}{{23}{2014}{{Salzman et~al.}}{{Salzman, Shaharabani, Agarwal, and Halperin}}}
-\bibcite{stogl2017tracking}{{24}{2017}{{Stogl et~al.}}{{Stogl, Zumkeller, Navarro, Heilig, and Hein}}}
-\bibcite{sun2010moving}{{25}{2010}{{Sun et~al.}}{{Sun, Yeoh, and Koenig}}}
-\bibcite{zhang2018gilbreth}{{26}{2018}{{Zhang et~al.}}{{Zhang, Li, Ripperger, Nicho, Veeraraghavan, and Fumagalli}}}
+\bibcite{cefalo2013task}{{4}{2013}{{Cefalo et~al.}}{{Cefalo, Oriolo, and Vendittelli}}}
+\bibcite{CCL10}{{5}{2010}{{Cohen et~al.}}{{Cohen, Chitta, and Likhachev}}}
+\bibcite{CSCL11}{{6}{2011}{{Cohen et~al.}}{{Cohen, Subramania, Chitta, and Likhachev}}}
+\bibcite{CSMOC15}{{7}{2015}{{Coleman et~al.}}{{Coleman, {\c {S}}ucan, Moll, Okada, and Correll}}}
+\bibcite{cowley2013perception}{{8}{2013}{{Cowley et~al.}}{{Cowley, Cohen, Marshall, Taylor, and Likhachev}}}
+\bibcite{DB14}{{9}{2014}{{Dobson and Bekris}}{{}}}
+\bibcite{fraichard1993dynamic}{{10}{1993}{{Fraichard}}{{}}}
+\bibcite{han2019toward}{{11}{2019}{{Han et~al.}}{{Han, Feng, and Yu}}}
+\bibcite{ishida1991moving}{{12}{1991}{{Ishida and Korf}}{{}}}
+\bibcite{ishida1995moving}{{13}{1995}{{Ishida and Korf}}{{}}}
+\bibcite{islam2019planning}{{14}{2019}{{Islam et~al.}}{{Islam, Vemula, Kim, Dornbush, Salzman, and Likhachev}}}
+\bibcite{JansonIP18}{{15}{}{{Janson et~al.}}{{Janson, Ichter, and Pavone}}}
+\bibcite{kavraki1996probabilistic}{{16}{1996}{{Kavraki et~al.}}{{Kavraki, Svestka, Latombe, and Overmars}}}
+\bibcite{KL06}{{17}{2006}{{Koenig and Likhachev}}{{}}}
+\bibcite{KS09}{{18}{2009}{{Koenig and Sun}}{{}}}
+\bibcite{koenig2007speeding}{{19}{2007}{{Koenig et~al.}}{{Koenig, Likhachev, and Sun}}}
+\bibcite{korf1990real}{{20}{1990}{{Korf}}{{}}}
+\bibcite{LF09}{{21}{2009}{{Likhachev and Ferguson}}{{}}}
+\bibcite{menon2014motion}{{22}{2014}{{Menon et~al.}}{{Menon, Cohen, and Likhachev}}}
+\bibcite{PCCL12}{{23}{2012}{{Phillips et~al.}}{{Phillips, Cohen, Chitta, and Likhachev}}}
+\bibcite{pohl1970heuristic}{{24}{1970}{{Pohl}}{{}}}
+\bibcite{SSAH14}{{25}{2014}{{Salzman et~al.}}{{Salzman, Shaharabani, Agarwal, and Halperin}}}
+\bibcite{stogl2017tracking}{{26}{2017}{{Stogl et~al.}}{{Stogl, Zumkeller, Navarro, Heilig, and Hein}}}
+\bibcite{sun2010moving}{{27}{2010}{{Sun et~al.}}{{Sun, Yeoh, and Koenig}}}
+\bibcite{yang2018planning}{{28}{2018}{{Yang et~al.}}{{Yang, Merkt, Ivan, and Vijayakumar}}}
+\bibcite{zhang2018gilbreth}{{29}{2018}{{Zhang et~al.}}{{Zhang, Li, Ripperger, Nicho, Veeraraghavan, and Fumagalli}}}
