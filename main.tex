@@ -34,7 +34,7 @@
 
 
 \graphicspath{
-	{./figs/}
+    {./figs/}
 }
 
 \hypersetup{letterpaper,bookmarksopen,bookmarksnumbered,
@@ -53,7 +53,7 @@ urlcolor=blue
 \begin{document}
 
 % paper title
-\title{Provably Constant-time Planning and Re-planning for Grasping Objects in Real-time off a Conveyor}
+\title{Provably Constant-time Planning and Replanning for Grasping Objects in Real-time off a Conveyor}
 
 % You will get a Paper-ID when submitting a pdf file to the conference system
 % \author{Author Names Omitted for Anonymous Review. Paper-ID [1329]}
@@ -63,10 +63,10 @@ urlcolor=blue
   Aditya Agarwal$^{1}$,
   Maxim Likhachev$^{1}$\\
     \authorblockA{
-	    $^{1}$The Robotics Institute, Carnegie Mellon University}
+        $^{1}$The Robotics Institute, Carnegie Mellon University}
     \authorblockA{
         $^{2}$Technion-Israel Institute of Technology
-	    }
+        }
     }
 
 %\author{\authorblockN{Michael Shell}
@@ -117,7 +117,7 @@ urlcolor=blue
 % \end{abstract}
 
 \begin{abstract}
-In warehousing and manufacturing environments, manipulation platforms are frequently deployed at conveyor belts to perform pick and place tasks. Because objects on the conveyor belts are moving, robots have limited time to pick them up. This brings the requirement for fast and reliable motion planners that could provide provable real-time planning guarantees, which the existing algorithms do not provide. Besides the planning efficiency, the success of manipulation tasks relies heavily on the accuracy of the perception system which often is noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts executing its motion. In order to be able to reach the object in time it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly in response to the pose updates from perception. We propose an approach that meets these requirements by providing provable constant-time planning and replanning guarantees. We present it, give its analytical properties and show experimental analysis in simulation and on a real robot.
+In warehouse and manufacturing environments, manipulation platforms are frequently deployed at conveyor belts to perform pick and place tasks. Because objects on the conveyor belts are moving, robots have limited time to pick them up. This brings the requirement for fast and reliable motion planners that could provide provable real-time planning guarantees, which the existing algorithms do not provide. Besides the planning efficiency, the success of manipulation tasks relies heavily on the accuracy of the perception system which is often noisy, especially if the target objects are perceived from a distance. For fast moving conveyor belts, the robot cannot wait for a perfect estimate before it starts executing its motion. In order to be able to reach the object in time it must start moving early on (relying on the initial noisy estimates) and adjust its motion on-the-fly in response to the pose updates from perception. We propose an approach that meets these requirements by providing provable constant-time planning and replanning guarantees. We present it, give its analytical properties and show experimental analysis in simulation and on a real robot.
 \end{abstract}
 
 
@@ -162,10 +162,10 @@ However, if the robot waits too long to get an accurate estimate of the object p
 Furthermore, the planning problem is challenging because the motion planner has to account for the dynamic object and thus plan with time as one of the planning dimension. It should generate a valid trajectory that avoids collision with the environment around it and also with the target object to ensure that it does not damage or topple it during the grasp. Avoiding collisions with the object requires precise geometric collision checking between the object geometry and the geometry of the manipulator. The resulting complexity of the planning problem makes it infeasible to plan online for this task.
 
 %%
-Motivated by these challenges, we propose a planning framework that leverages offline preprocessing to provide bounds on the planning time when the planner is invoked online. Our key insight is that in our domain the manipulation task is highly repetitive. Even for different object poses, the computed paths are quite similar and can be efficiently reused to speed up online planning. Based on this insight, we derive a method that precomputes a representative set of paths offline with some auxiliary datastructures and uses them online in a way that provides constant-time planning guarantee. Here, we assume that the models of the target objects are known. Namely, the planner is provided with the geometric model of the target object apriori. To the best of our knowledge, our approach is the first to provide provable constant-time planning guarantees on generating motions all the way to the goal for dynamic environments.
+Motivated by these challenges, we propose a planning framework that leverages offline preprocessing to provide bounds on the planning time when the planner is invoked online. Our key insight is that in our domain the manipulation task is highly repetitive. Even for different object poses, the computed paths are quite similar and can be efficiently reused to speed up online planning. Based on this insight, we derive a method that precomputes a representative set of paths offline with some auxiliary datastructures and uses them online in a way that provides \emph{constant-time planning guarantee}. Here, we assume that the models of the target objects are known. Namely, the planner is provided with the geometric model of the target object apriori. To the best of our knowledge, our approach is the first to provide provable constant-time planning guarantees on generating motions all the way to the goal for dynamic environments.
 
 %
-We experimentally show that constant-time planning and replanning capability is necessary for a successful conveyor pickup task. Specifically if we only perform one-time planning, (namely, either following the plan for the initial noisy pose estimate or from a delayed but accurate pose estimate) the robot frequently fails to pick the object.
+We experimentally show that constant-time planning and replanning capability is necessary for a successful conveyor pickup task. Specifically if we only perform one-time planning, (namely, either following the plan for the initial potentially inaccurate pose estimate or from a delayed but accurate pose estimate) the robot frequently fails to pick the object.
 \begin{figure}[t]
     \centering
     \begin{subfigure}{.225\textwidth}
@@ -195,8 +195,8 @@ We experimentally show that constant-time planning and replanning capability is 
 \subsection{Motion planning for conveyor pickup task}
 Existing work on picking moving objects has focused on different aspects of the problem ranging from closed-loop controls to object perception and pose estimation, motion planning and others~\cite{allen1993automated, han2019toward, stogl2017tracking, zhang2018gilbreth}. 
 %
-Here, we focus on motion-planning related work. Time-configuration space representation was introduced to avoid moving obstacles~\cite{fraichard1993dynamic,cefalo2013task,yang2018planning}. Specifically in ~\cite{yang2018planning}, a bidirectional sampling-based method with a time-configuration space representation was used to plan motions in dynamic environments to pickup moving objects. While their method showed real-time performance in complex tasks, it used fully-specified goals which limits te applicability of the work. Furthermore their method is probablistically complete and therefore, does not offer constant-time behavior.
-Graph-search based approaches have also been used for the motion-planning problem~\cite{cowley2013perception, menon2014motion}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
+Here, we focus on motion-planning related work. Time-configuration space representation was introduced to avoid moving obstacles~\cite{fraichard1993dynamic,cefalo2013task,yang2018planning}. Specifically in ~\cite{yang2018planning}, a bidirectional sampling-based method with a time-configuration space representation was used to plan motions in dynamic environments to pickup moving objects. While their method showed real-time performance in complex tasks, it used fully-specified goals; namely knowing the time at which the object should be picked, which weakens the completeness guarantee. Furthermore their method is probablistically complete and therefore, does not offer constant-time behavior.
+Graph-search based approaches have also been used for the motion-planning problem~\cite{menon2014motion, cowley2013perception}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
 %
 The latter work demonstrated online real-time planning capability. The approach plans to a pregrasp pose with pure kinematic planning and relies on Cartesian-space controllers to perform the pick up. The usage of the Cartesian controller limits the types of objects that the robot can grasp.
 
@@ -204,17 +204,16 @@ The latter work demonstrated online real-time planning capability. The approach 
 \subsection{Preprocessing-based planning}
 Preprocessing-based motion planners often prove beneficial for real-time planning. They analyse the configuration space offline to generate some auxiliary information that can be used online to speed up planning. 
 Probably the best-known example is the Probablistic Roadmap Method (\algname{PRM})~\cite{kavraki1996probabilistic} which precomputes a roadmap that can answer any query by connecting the start and goal configurations to the roadmap and then searching the roadmap. \textsf{PRM}s are fast to query yet they do not provide constant-time guarantees.
-Moreover for a moving object (as we have in our setting), they would require edge re-evaluation which is often computationally expensive.
+Moreover, in our case, to account for a moving object, they would require edge re-evaluation which is often computationally expensive.
 %
 
-A provably constant-time planner was recently proposed in~\cite{islam2019planning}. Given a start state and a goal region, it precomputes a compressed set of paths that can be utilised online to plan to any goal state within the goal region in bounded time. As we will see, our approach bears close resemblance with this work in the context of the paths-compression mechanism.
+A provably constant-time planner was recently proposed in~\cite{islam2019planning}. Given a start state and a goal region, it precomputes a compressed set of paths that can be utilised online to plan to any goal state within the goal region in bounded time. As we will see, our approach while algorithmically different, draws some inspiration from this work.
 %
-
-Using either of these two methods (\cite{islam2019planning,kavraki1996probabilistic}) in our context is not straightforward as they are only applicable to pure kinematic planning and thus they cannot be used for the conveyor-planning problem which is dynamic in nature.
+Both of the above two methods (\cite{islam2019planning,kavraki1996probabilistic}) are mainly targetting pure kinematic planning and thus they cannot be used for the conveyor-planning problem which is dynamic in nature.
 %
 
 Another family of preprocessing-based planners utilises previous experiences to speed up the search~\cite{BAG12,CSMOC15,PCCL12}. Experience graphs~\cite{PCCL12}, provide speed up in planning times for repetitive tasks by trying to reuse previous experiences. These methods are also augmented with sparsification techniques (see e.g.,~\cite{DB14,SSAH14}) to reduce the memory footprint of the algorithm.
-Unfortunately, none of the mentioned algorithms provide fixed planning-time guarantees that are required by our application.
+Unfortunately, none of the mentioned algorithms provide fixed planning-time guarantees that we strive for in our application.
 
 \subsection{Online replanning and real time planning}
 The conveyor-planning problem can be modelled as a Moving Target Search problem (MTS) which is a widely-studied topic in the graph search-based planning literature~\cite{ishida1991moving,ishida1995moving,koenig2007speeding,sun2010moving}. 
@@ -233,7 +232,7 @@ a conveyor belt~$\calB$ moving at some known velocity,
 a set of known objects~$\calO$ that need to be grasped and 
 a perception system~$\calP$ that is able to estimate the type of object and its location on~$\calB$.
 
-Given a pose $g$ of an object $o \in \calO$, our task is to plan the motion of $\calR$ such that it will be able to pick~$o$ from~$\calB$ at some future time.
+Given a pose $g$ of an object $o \in \calO$, our task is to plan the motion of $\calR$ such that grasps~$o$ from~$\calB$ at some future time.
 %
 Unfortunately, the perception system $\calP$ may give inaccurate object poses.
 Thus, the pose $g$ will be updated by~$\calP$ as $\calR$ is executing its motion. 
@@ -246,10 +245,10 @@ This is explained in detail in Sec.~\ref{sec:eval} and in Fig.~\ref{fig:pe}.
 %
 We denote by $\Gfull$ the discrete set of initial object poses on $\calB$ that $\calP$ can perceive.
 %
-Finally, we assume that $\calR$ has an initial configuration \Shome from which it will start its motion to grasp any object.
+Finally, we assume that $\calR$ has an initial state \Shome corresponding to the time $t=0$ from which it starts planning to grasp any object.
 
 
-Roughly speaking, the objective, following the set of assumptions we will shortly state, is to enable planning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound regardless of $\calR$'s current state.
+Roughly speaking, the objective, following the set of assumptions we will shortly state, is to enable planning and replanning to any goal pose $ g \in \Gfull$ in bounded time~\Tbound regardless of $\calR$'s current state.
 %More specifically, the perception system is setup such that it sends updated pose estimates on the fly as the object moves along the conveyor belt and as the robot approaches the object.   
 To formalize this idea, let us introduce the notion of \emph{reachable} and \emph{covered} states:
 
@@ -267,7 +266,7 @@ To formalize this idea, let us introduce the notion of \emph{reachable} and \emp
 
 Thus, we wish to build a system such that 
 for any state $s$ that the system can be in 
-and every reachable goal pose $g \in \Gfull$ updated by~$\calP$,
+and every reachable goal pose $g \in \Gfull$ from $s$ updated by~$\calP$,
 $g$ is covered by $s$.
 
 
@@ -290,18 +289,20 @@ We make the following assumptions about the system.
 }
 
 %    \item \label{assum:3} \Gfull would accommodate for an error $\epsilon$ in the initial pose estimate $g_{\textrm{init}}$ of the perception system. Each subsequent estimate $g_{\textrm{next}}$ will be within the $\epsilon$ window around $g_{\textrm{init}}$ (in retrospect because the conveyor is moving).
-    \item \label{assum:4} There exists a replan cutoff time \Trc from when the robot starts moving, after which the planner does not replan and continues to execute the last planned path.
+    \item \label{assum:4} There exists a replan cutoff time $t=\Trc$, after which the planner does not replan and continues to execute the last planned path.
 
-    \item \label{assum:5} If the robot starts moving at $t = 0$ then for any time $t \leq \Trc$, the environment is static. Namely, objects on~$\calB$ cannot collide with $\calR$ during that time.
-    
-    \item \label{assum:3} Given an initial goal pose $g_{\textrm{init}} \in \Gfull$ by $\calP$, any subsequent pose $g_{\textrm{new}} \in \Gfull$ is at most $\varepsilon_\calP$ distance away from $g_{\textrm{init}}$ (after accounting for the fact that the object moved along $\calB$).
+    \item \label{assum:5} For any time $0 \leq t \leq \Trc$, the environment is static. Namely, objects on~$\calB$ cannot collide with $\calR$ during that time.
+
+    \item \label{assum:3} The pose estimation error of $\calP$ is bounded by a distance $\varepsilon$.
+        
+%    \item \label{assum:3} Given an initial goal pose $g_{\textrm{init}} \in \Gfull$ by $\calP$, any subsequent pose $g_{\textrm{new}} \in \Gfull$ is at most $\varepsilon$ distance away from $g_{\textrm{init}}$ (after accounting for the fact that the object moved along $\calB$).
     
 
 \end{enumerate}
 
-Assumptions~\ref{assum:4}-\ref{assum:5} enforce a requirement that $\calP$ must provide an accurate estimate $g$ while $o$ is at a safe distance from~$\calR$.
+Assumptions~\ref{assum:4}-\ref{assum:5} enforce a requirement that $\calP$ must converge on an accurate estimate $g$ before \Trc, and until \Trc, $o$ is guaranteed to be at a safe distance from $\calR$.
 %
-Assumption~\ref{assum:3} corresponds to the error tolerance of the perception system. This is explained in detail in Sec.~\ref{sec:eval} and in Fig.~\ref{fig:pe}
+Assumption~\ref{assum:3} bounds the maximum error of $\calP$ and is explained in detail in Sec.~\ref{sec:eval} and in Fig.~\ref{fig:pe}
 % Assumption~\ref{assum:1} corresponds to properties of the environment \emph{without} taking the objects on the conveyor belt into account 
 % while
 
@@ -311,11 +312,11 @@ Assumption~\ref{assum:3} corresponds to the error tolerance of the perception sy
 
 \section{Algorithmic framework}
 \label{subsec:strawman}
-Our approach for bounded-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal state (under Assumptions~\ref{assum:4}-\ref{assum:3}). 
+Our approach for constant-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal state (under Assumptions~\ref{assum:4}-\ref{assum:3}). 
 %
 Before we describe our approach, we start by describing a \naive method that solves the aforementioned problem but requires a prohibitive amount of memory.
 %
-This can be seen as a warmup before describing our algorithm which exhibits the same traits but doing so in a memory-efficient manner.
+This can be seen as a warmup before describing our algorithm which exhibits the same traits but does so in a memory-efficient manner.
 
 \subsection{Straw man approach}
 \begin{figure}[t]
@@ -336,10 +337,10 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     \end{subfigure}
     \caption{
     \CaptionTextSize
-    The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta t$.
-    (\subref{fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths that is from \Shome to every $g \in \Gfull$.
-    (\subref{fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull$ (here we only show paths from three states).
-    Thus, the number of paths increasing exponentially at every timestep.
+    The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta_t$.
+    (\subref{fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths, that is from \Shome to every $g \in \Gfull$.
+    (\subref{fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths, that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull$ (here we only show paths from three states).
+    Thus, the number of paths increases exponentially at every timestep.
     }
     \label{fig:naive}
     %\vspace{-5mm}
@@ -347,17 +348,18 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
 
 We first compute from \Shome a path $\pi_g$ to every reachable $g \in \Gfull$. 
 %(such a path exists following \ref{assum:1}).
-These paths can be stored in a lookup table which can be queried in constant time. Thus, all goal states are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
+These paths can be stored in a lookup (hash) table which can be queried in constant time (assuming perfect hashing~\cite{czech1997perfect}). Thus, all goal states are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
 However, we need to account for pose update while executing~$\pi_g$. 
 %
 Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time~\Trc.
-Thus, we discretize each path uniformly with resolution $\delta t$. As we will see, this will allow the system to start executing a new path within $\Tbound + \delta_t$ after a new pose estimation is obtained from $\calP$.
+Thus, we discretize each path uniformly with resolution $\delta_t$.
+%As we will see, this will allow the system to start executing a new path within $\Tbound + \delta_t$ after a new pose estimation is obtained from $\calP$.
 %
 We call all states that are less than \Trc time from \Shome \emph{replanable states}.
 
 
 Next, for every replanable state along each path $\pi_g$, we compute a new path to all goal states. 
-%\bound{that are $\varepsilon_\calP$ away from $g$}.
+%\bound{that are $\varepsilon$ away from $g$}.
 %See Fig.~\ref{fig:naive}.
 %
 This will ensure that all goal states are covered by all replanable states. Namely, it will allow to immediately start executing a new path once the goal location is updated by~$\calP$.
@@ -371,7 +373,7 @@ The paths are stored in a lookup table $\calM: S \times \Gfull \rightarrow \{ \p
 In the query stage we obtain an estimation $g_1$ of the goal pose by $\calP$. 
 The algorithm then retrieves the path~$\pi_1(\Shome,g_1)$ (from~\Shome to~$g_1$) from $\calM$ and the robot starts executing~$\Pi_1(\Shome,g_1)$.
 %
-For every new estimation $g_i$ of the goal pose obtained from~$\calP$  while the system is executing path $\pi_{i-1}(s,g_{i-1})$, the algorithm retrieves from $\calM$ the path $\pi_i(s',g_i)$ from the first state~$s'$ along $\pi_{i-1}(s,g_{i-1})$ that is least $\Tbound$ away from~$s$. The robot~$\calR$ will then start executing~$\pi_i(s',g_i)$ once it reaches~$s'$.
+For every new estimation $g_i$ of the goal pose obtained from~$\calP$  while the system is executing path $\pi_{i-1}(s_{i-1},g_{i-1})$, the algorithm retrieves from $\calM$ the path $\pi_i(s_i,g_i)$ from the first state~$s_i$ along $\pi_{i-1}(s_{i-1},g_{i-1})$ that is least $\Tbound$ away from~$s_{i-1}$. The robot~$\calR$ will then start executing~$\pi_i(s_i,g_i)$ once it reaches~$s_i$.
 
 Clearly, every state is covered by this brute-force approach, however it requires a massive amount of memory.
 Let $n_{\rm goal} = \vert \Gfull \vert$ be the number of goal states and
@@ -545,7 +547,7 @@ Alg.~\ref{alg:step1} details this step (if called for arguments (\Shome,\Gfull))
 %    \State $\Pi_i \leftarrow$ \textsc{PlanPath}($s_{\textrm{start}}, g_i$)
 %        \Comment{plan root path}
     \If {$\Pi_i \leftarrow$ \textsc{PlanRootPath}($s_{\textrm{start}}, g_i$)} \Comment{planner succeeded}
-        \State $G_i \leftarrow \{ g_i \}$	\Comment{goals reachable}
+        \State $G_i \leftarrow \{ g_i \}$   \Comment{goals reachable}
         \For {\textbf{each} $g_j \in \Guncov$}
 %            \State $\pi_j \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g_j,\Pi_i$)
             \If {$\pi_j \leftarrow$\textsc{PlanPathWithExperience}($s_{\textrm{start}},g_j,\Pi_i$)}
@@ -617,7 +619,7 @@ Alg.~\ref{alg:step1} details this step (if called for arguments (\Shome,\Gfull))
            $G_i^{\textrm{uncov}} \leftarrow G^{\textrm{cov}}_{\Sstart} \setminus G_i$; \label{uncov_init}
             \hspace{2mm}
 
-	\For {\textbf{each} $s \in \Pi_i$ ({from last to first})} \Comment{states up to $\Trc$} \label{loop2}
+    \For {\textbf{each} $s \in \Pi_i$ ({from last to first})} \Comment{states up to $\Trc$} \label{loop2}
 %    \While{$t \geq t(\Sstart)$}
 %        \State $s \leftarrow$ \textsc{GetState($\Pi_i, t$)}
 \textcolor{blue}{
@@ -627,14 +629,14 @@ Alg.~\ref{alg:step1} details this step (if called for arguments (\Shome,\Gfull))
             \State \textbf{break}
         \EndIf
 } %color
-        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)	\label{recursion}
+        \State $G_i^{\textrm{uncov}},G_i^{\textrm{cov}} \leftarrow$ \textsc{Preprocess}($s,G_i^{\textrm{uncov}},G_i^{\textrm{cov}}$)    \label{recursion}
         \If{$G_i^{\textrm{uncov}} = \emptyset$} \label{terminate}
             \State \textbf{break}
         \EndIf
 %        \State $t \leftarrow t - \delta_t$
  %   \EndWhile
  
- 	\EndFor
+    \EndFor
     % \State $(\Pi_i,\Pi_j).s = s$ \Comment{replan state}
 \EndFor
 \EndIf
@@ -677,10 +679,10 @@ At a high level, the algorithm iterates through each root path $\Pi_i$ (loop at 
 In order to minimise the required computation, the algorithm leverages two key observations:
 
 \begin{enumerate}[label={\textbf{O\arabic*}},leftmargin=0.75cm]
-	\item \label{obs:1}
-	If a goal is not reachable from a state $s \in \Pi$, it is not reachable from all the states proceeding it on $\Pi$
-	\item \label{obs:2}
-	If a goal is covered by a state $s \in \Pi$, it is also covered by all states preceeding it on $\Pi$
+    \item \label{obs:1}
+    If a goal is not reachable from a state $s \in \Pi$, it is not reachable from all the states proceeding it on $\Pi$
+    \item \label{obs:2}
+    If a goal is covered by a state $s \in \Pi$, it is also covered by all states preceeding it on $\Pi$
 \end{enumerate}
 
 %O1 usage
@@ -879,7 +881,7 @@ For pseudocode describing our approach see~\ref{alg:query}.
 \Procedure{Query}{$g, \pi_{\textrm{curr}},s_{\textrm{start}}$}
 %\State $t \leftarrow \Trc$; \hspace{3mm} $t_{\textrm{curr}}\leftarrow \textsc{CurrentTime} + \Tbound$
 %\While{$t \geq t_{\textrm{curr}}$}
-	\For {\textbf{each} $s \in \pi_{\textrm{curr}}$ (from last to $\Sstart$)} \Comment{states up to $\Trc$}
+    \For {\textbf{each} $s \in \pi_{\textrm{curr}}$ (from last to $\Sstart$)} \Comment{states up to $\Trc$}
 %    \State $s \leftarrow$ \textsc{GetState}($\pi_{\textrm{curr}}, t$)
 %        \Comment{Get state on path at time $t$}
         \label{alg:query:line:c2a}
@@ -899,18 +901,18 @@ For pseudocode describing our approach see~\ref{alg:query}.
 %    \State $\Pi_{\textrm{home}} \leftarrow \calM (\Shome,g)$
 %     \Comment{Lookup root path from  to $g$}
      %\label{alg:query:line:c3a}
-	\textcolor{blue}{
-	\If {$\pi \leftarrow $\textsc{PlanPathByLatching}($\Sstart,g$) \textbf{successful}}
-		\State \textbf{return} $\pi$
-	\EndIf
-	}
+    \textcolor{blue}{
+    \If {$\pi \leftarrow $\textsc{PlanPathByLatching}($\Sstart,g$) \textbf{successful}}
+        \State \textbf{return} $\pi$
+    \EndIf
+    }
 %%%%%%%%%%%
    % \State $t \leftarrow t - \delta_t$
 %\EndWhile
 
 \EndFor
 %}
-	\State \textbf{return failure} \Comment{goal is not reachable}
+    \State \textbf{return failure} \Comment{goal is not reachable}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -938,7 +940,7 @@ For pseudocode describing our approach see~\ref{alg:query}.
 \subsubsection{Latching: Reusing Root Paths}
 \label{latching}
 We introduce an additional step called ``Latching" to minimise the number of root paths computed in Alg.~\ref{alg:preprocess}. With latching, the algorithm tries to reuse previously computed root paths as much as possible using special motion primitives that allow transitions from one root path to another.
-The primitive is computed from a state $s \in \Pi_i$ to $s' \in \Pi_j$ such that $t(s') = t(s) + \delta t$ by simple linear interpolation while ensuring that kinodynamic constraints of the robot are satisfied. Specifically, given the nominal joint velocities of the robot if from $s$, $s'$ can be reached in time $\delta t$, while respecting the kinematic and collision constraints, then the transition is allowed.
+The primitive is computed from a state $s \in \Pi_i$ to $s' \in \Pi_j$ such that $t(s') = t(s) + \delta_t$ by simple linear interpolation while ensuring that kinodynamic constraints of the robot are satisfied. Specifically, given the nominal joint velocities of the robot if from $s$, $s'$ can be reached in time $\delta_t$, while respecting the kinematic and collision constraints, then the transition is allowed.
 
 In Alg.~\ref{alg:preprocess}, before calling the \textsc{Preprocess} procedure for a state, the algorithm removes the set of goals that can be covered via latching, thereby reducing the number of goals that need to be covered by the \textsc{Preprocess} procedure. Correspondingly, in Alg.~\ref{alg:query}, an additional procedure is called to check if the path can be found via latching. These additions in the two pseudocodes are shown in blue.
 
@@ -1093,19 +1095,19 @@ To define the set of all goal poses~$\Gfull$, we need to detail our system setup
 The conveyor belt $\calB$ moves along the $x$-axis from left to right.
 We pick a fixed $x$-value termed~\Xexec, such that when the incoming $o$ reaches \Xexec as per the perception information, at that point we start execution.
 
-% We assume that there exists a specific $x$-value, termed~\Xexec, such that when the robot start's executing for the first time, the object's  $x$-value will be in the range $[\Xexec-\varepsilon_\calP, \Xexec]$.
-%any forward propagation to $t_{\rm exec}$ time an initial pose estimate is given for an object, its $x$-value is in the range $[\Xexec-\varepsilon_\calP, \Xexec]$.
+% We assume that there exists a specific $x$-value, termed~\Xexec, such that when the robot start's executing for the first time, the object's  $x$-value will be in the range $[\Xexec-\varepsilon, \Xexec]$.
+%any forward propagation to $t_{\rm exec}$ time an initial pose estimate is given for an object, its $x$-value is in the range $[\Xexec-\varepsilon, \Xexec]$.
 %
 Recall that a pose of an object~$o$ is a three dimensional point~$(x,y,\theta)$ corresponding to the $(x,y)$ location of~$o$ and to its orientation (yaw angle) along $\calB$.
 %
-$\Gfull$ contains a fine discretization of all possible $y$ and $\theta$ values and $x$ values in  $[\Xexec-\varepsilon_\calP, \Xexec+\varepsilon_\calP]$.
-We select $\Gfull$ such that $\varepsilon_\calP = 0.5$ cm, dimension along $y$-axis is 20 cm. The discretization in $x,y$ and $\theta$ is 1.0 cm and 10 degrees respectively.
+$\Gfull$ contains a fine discretization of all possible $y$ and $\theta$ values and $x$ values in  $[\Xexec-\varepsilon, \Xexec+\varepsilon]$.
+We select $\Gfull$ such that $\varepsilon = 0.5$ cm, dimension along $y$-axis is 20 cm. The discretization in $x,y$ and $\theta$ is 1.0 cm and 10 degrees respectively.
 
 In the example depicted in Fig.~\ref{fig:pe}, the thick and the thin solid rectangles show the ground truth and estimated poses, respectively at two time instances in the life time of the object.
 %
 The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During execution, the robot receives an improved estimate and has to replan for it. At this point we back project this new estimate in time using the known speed of the conveyor and the time duration between the two estimates. This back-projected pose (shown as the dotted rectangle) is then picked as the new goal for replanning. Recall that under the assumption ~\ref{assum:3} the back projected pose will always lie inside \Gfull.
 %
-%Recall that we assume that the new estimate will be within the $\pm \varepsilon_\calP$ window around \Xexec, it will always lie within \Gfull. 
+%Recall that we assume that the new estimate will be within the $\pm \varepsilon$ window around \Xexec, it will always lie within \Gfull. 
 %As \Gfull contains all $y$ and $\theta$ values (up to our discretization), our system can handle the errors along those dimensions.
 
 
