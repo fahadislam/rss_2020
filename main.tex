@@ -195,8 +195,8 @@ We experimentally show that constant-time planning and replanning capability is 
 \subsection{Motion planning for conveyor pickup task}
 Existing work on picking moving objects has focused on different aspects of the problem ranging from closed-loop controls to object perception and pose estimation, motion planning and others~\cite{allen1993automated, han2019toward, stogl2017tracking, zhang2018gilbreth}. 
 %
-Here, we focus on motion-planning related work. Time-configuration space representation was introduced to avoid moving obstacles~\cite{fraichard1993dynamic,cefalo2013task,yang2018planning}. Specifically in ~\cite{yang2018planning}, a bidirectional sampling-based method with a time-configuration space representation was used to plan motions in dynamic environments to pickup moving objects. While their method showed real-time performance in complex tasks, it used fully specified goals which weakens the completeness guarantees. Furthermore their method is probablistically complete and therefore, does not offer constant-time behavior.
-Graph-searched based approaches have also been used for the motion-planning problem~\cite{cowley2013perception, menon2014motion}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
+Here, we focus on motion-planning related work. Time-configuration space representation was introduced to avoid moving obstacles~\cite{fraichard1993dynamic,cefalo2013task,yang2018planning}. Specifically in ~\cite{yang2018planning}, a bidirectional sampling-based method with a time-configuration space representation was used to plan motions in dynamic environments to pickup moving objects. While their method showed real-time performance in complex tasks, it used fully-specified goals which limits te applicability of the work. Furthermore their method is probablistically complete and therefore, does not offer constant-time behavior.
+Graph-search based approaches have also been used for the motion-planning problem~\cite{cowley2013perception, menon2014motion}. The former uses a kinodynamic motion planner to smoothly pick up moving objects i.e., without an impactful contact. A heuristic search-based motion planner that plans with dynamics and could generate optimal trajectories with respect to the time of execution was used. While this planner provides strong optimality guarantees, it is not real-time and thus cannot be used online.
 %
 The latter work demonstrated online real-time planning capability. The approach plans to a pregrasp pose with pure kinematic planning and relies on Cartesian-space controllers to perform the pick up. The usage of the Cartesian controller limits the types of objects that the robot can grasp.
 
@@ -299,7 +299,7 @@ We make the following assumptions about the system.
 
 \end{enumerate}
 
-Assumptions~\ref{assum:4}-\ref{assum:5} enforce a requirement that $\calP$ must provide an accurate estimate $g$ while $o$ is at a safe distance from $\calR$.
+Assumptions~\ref{assum:4}-\ref{assum:5} enforce a requirement that $\calP$ must provide an accurate estimate $g$ while $o$ is at a safe distance from~$\calR$.
 %
 Assumption~\ref{assum:3} corresponds to the error tolerance of the perception system. This is explained in detail in Sec.~\ref{sec:eval} and in Fig.~\ref{fig:pe}
 % Assumption~\ref{assum:1} corresponds to properties of the environment \emph{without} taking the objects on the conveyor belt into account 
@@ -336,7 +336,7 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     \end{subfigure}
     \caption{
     \CaptionTextSize
-    The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta t$
+    The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta t$.
     (\subref{fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths that is from \Shome to every $g \in \Gfull$.
     (\subref{fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull$ (here we only show paths from three states).
     Thus, the number of paths increasing exponentially at every timestep.
@@ -439,13 +439,13 @@ $$
 Here, $t(s,g)$ is the expected time to intercept the object which can be analytically computed from the velocities and positions of the target object and the end-effector and \textsc{AngleDiff}($s,g$) gives the magnitude of angular difference between the end-effector's current pose and target pose.
 
 \subsubsection{Planning with Experience Reuse}
-We now show how previously computed paths which we named as root paths can be reused as experiences in our framework. Given a heuristic function $h$ we define for a root path $\Pi$ and a goal state $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the  state that is closest to~$g$ with respect~$h$.
+We now show how previously-computed paths which we named as root paths can be reused as experiences in our framework. Given a heuristic function $h$ we define for a root path $\Pi$ and a goal state $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the  state that is closest to~$g$ with respect~$h$.
 Namely,
 %\vspace{-3mm}
 $$
 \Ssc (\Pi,g) := \argmin\limits_{s_i \in \Pi} h(s_i, g).
 $$
-Now, when searching for a path to a goal state $g \in \Gfull$ using root path $\Pi$ as experience, we add $\Ssc (\Pi,g)$ as a successor for any state along $\Pi$
+Now, when searching for a path to a goal state $g \in \Gfull$ using root path $\Pi$ as an experience, we add $\Ssc (\Pi,g)$ as a successor for any state along~$\Pi$
 (subject to the constraint that the path along $\Pi$ to \Ssc is collision free). In this manner we reuse previous experience to quickly reach a state close to the $g$.
 
 \ignore{
@@ -667,7 +667,7 @@ Alg.~\ref{alg:step1} details this step (if called for arguments (\Shome,\Gfull))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-So far we explained the algorithm for one-time planning when the robot is at \Shome ($t = 0$); we now need to allow for efficient replanning for any state $s$ between $t = 0$ to $\Trc$. In order to do so, we iterate through all the states on these root paths and add additional root paths so that these states also cover their respective reachable goals. This has to be done recursively since newly added paths generate new states which the robot may have to replan from. The complete process is detailed in Alg.~\ref{alg:preprocess}. The \textsc{Preprocess} procedure is initially called for arguments ($\Shome, \Gfull, \emptyset$) and it runs recursively until no state is left with uncovered reachable goals.
+So far we explained the algorithm for one-time planning when the robot is at \Shome ($t = 0$); we now need to allow for efficient replanning for any state $s$ between $t = 0$ to $\Trc$. In order to do so, we iterate through all the states on these root paths and add additional root paths so that these states also cover their respective reachable goals. This has to be done recursively since newly-added paths generate new states which the robot may have to replan from. The complete process is detailed in Alg.~\ref{alg:preprocess}. The \textsc{Preprocess} procedure is initially called for arguments ($\Shome, \Gfull, \emptyset$) and it runs recursively until no state is left with uncovered reachable goals.
 %
 % Explaining pseudo code
 
@@ -1024,7 +1024,7 @@ If this is the case we know that any goal state in $G_j$ can be
 
 \section{Evaluation}
 \label{sec:eval}
-We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
+We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at~\url{https://tinyurl.com/yaz76x9e}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
 
 
 \begin{table*}[t]
