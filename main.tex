@@ -340,9 +340,9 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     \caption{
     \CaptionTextSize
     The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta_t$.
-    (\subref{fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths, that is from \Shome to every $g \in \Gfull$.
-    (\subref{fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths, that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull$ (here we only show paths from three states).
-    Thus, the number of paths increases exponentially at every timestep.
+    (\subref{fig:naive1})~At $t = 0$, the algorithm computes $n_{\rm goal}$ paths, that is from \Shome to every $g \in \Gfull$.
+    (\subref{fig:naive2})~At $t = \delta_t$, the algorithm computes $n_{\rm goal}^2$ paths, that is from all $n_{\rm goal}$ replanable states at $t = \delta_t$ to every $g \in \Gfull$ (here we only show paths from three states).
+    Thus, the number of paths increases exponentially at every time step.
     }
     \label{fig:naive}
     %\vspace{-5mm}
