@@ -295,7 +295,7 @@ We make the following assumptions about the system.
 
     \item \label{assum:5} For any time $0 \leq t \leq \Trc$, the environment is static. Namely, objects on~$\calB$ cannot collide with $\calR$ during that time.
 
-    \item \label{assum:3} The pose estimation error of $\calP$ is bounded by a distance $\varepsilon$.
+    \item \label{assum:3} The pose estimation error of $\calP$ is bounded by a distance $\varepsilon_{\calP}$.
         
 %    \item \label{assum:3} Given an initial goal pose $g_{\textrm{init}} \in \Gfull$ by $\calP$, any subsequent pose $g_{\textrm{new}} \in \Gfull$ is at most $\varepsilon$ distance away from $g_{\textrm{init}}$ (after accounting for the fact that the object moved along $\calB$).
     
@@ -340,9 +340,9 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     \caption{
     \CaptionTextSize
     The figures show paths discretized from timesteps $t_0$ to $\Trc$ with steps of size $\delta_t$.
-    (\subref{fig:naive1})~At $t = 0$, the algorithm computes $n_{\rm goal}$ paths, that is from \Shome to every $g \in \Gfull$.
-    (\subref{fig:naive2})~At $t = \delta_t$, the algorithm computes $n_{\rm goal}^2$ paths, that is from all $n_{\rm goal}$ replanable states at $t = \delta_t$ to every $g \in \Gfull$ (here we only show paths from three states).
-    Thus, the number of paths increases exponentially at every time step.
+    (\subref{fig:naive1})~At $t_0$, the algorithm computes $n_{\rm goal}$ paths, that is from \Shome to every $g \in \Gfull$.
+    (\subref{fig:naive2})~At $t_1$, the algorithm computes $n_{\rm goal}^2$ paths, that is from all $n_{\rm goal}$ replanable states at $t_1$ to every $g \in \Gfull$ (here we only show paths from three states).
+    Thus, the number of paths increases exponentially at every timestep.
     }
     \label{fig:naive}
     %\vspace{-5mm}
@@ -523,6 +523,7 @@ We are finally ready to describe our algorithm describing first the preprocessin
 \end{figure*}
 
 Our preprocessing stage starts by sampling a goal state~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ the set of goals ~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any $g_j \in G_1$ within~\Tbound.
+\footnote{In practice, to account for other query phase operations, such as hash table lookups etc., a slightly smaller time than \Tbound is provided to the experience-based planner, to ensure that the overall query time is bounded by \Tbound}
 Thus, all goal states in~$G_1$ are covered by~\Shome.
 %
 We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus G_1$, thereby removing covered goals from \Gfull in every iteration.
@@ -1095,7 +1096,7 @@ While executing the plan, if we obtain an updated pose estimate, the execution i
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/timeline2.pdf}
+    \includegraphics[width=0.45\textwidth]{figs/timeline2.pdf}
     \caption{\CaptionTextSize Timeline of the sense-plan-act cycle.}
     \label{fig:tl}
     %\vspace{-5mm}
@@ -1111,12 +1112,12 @@ We pick a fixed $x$-value termed~\Xexec, such that when the incoming $o$ reaches
 %
 Recall that a pose of an object~$o$ is a three dimensional point~$(x,y,\theta)$ corresponding to the $(x,y)$ location of~$o$ and to its orientation (yaw angle) along $\calB$.
 %
-$\Gfull$ contains a fine discretization of all possible $y$ and $\theta$ values and $x$ values in  $[\Xexec-\varepsilon, \Xexec+\varepsilon]$.
-We select $\Gfull$ such that $\varepsilon = 0.5$ cm, dimension along $y$-axis is 20 cm. The discretization in $x,y$ and $\theta$ is 1.0 cm and 10 degrees respectively.
+$\Gfull$ contains a fine discretization of all possible $y$ and $\theta$ values and $x$ values in  $[\Xexec-2\varepsilon_{\calP}, \Xexec+2\varepsilon_{\calP}]$.
+We select $\Gfull$ such that $\varepsilon = 2.5$cm, dimension along $y$-axis is 20cm. The discretization in $x,y$ and $\theta$ is 1.0cm and 10 degrees respectively.
 
 In the example depicted in Fig.~\ref{fig:pe}, the thick and the thin solid rectangles show the ground truth and estimated poses, respectively at two time instances in the life time of the object.
 %
-The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During execution, the robot receives an improved estimate and has to replan for it. At this point we back project this new estimate in time using the known speed of the conveyor and the time duration between the two estimates. This back-projected pose (shown as the dotted rectangle) is then picked as the new goal for replanning. Recall that under the assumption ~\ref{assum:3} the back projected pose will always lie inside \Gfull.
+The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During execution, the robot receives an improved estimate and has to replan for it. At this point we back project this new estimate in time using the known speed of the conveyor and the time duration between the two estimates. This back-projected pose (shown as the dotted rectangle) is then picked as the new goal for replanning. Recall that under the assumption~\ref{assum:3} the back projected pose will always lie inside \Gfull.
 %
 %Recall that we assume that the new estimate will be within the $\pm \varepsilon$ window around \Xexec, it will always lie within \Gfull. 
 %As \Gfull contains all $y$ and $\theta$ values (up to our discretization), our system can handle the errors along those dimensions.
@@ -1134,9 +1135,9 @@ The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During ex
 
 \subsection{Results}
 
-Before we report on our system-level results comparing our work with alternative implementation (namely, results from the query stage), we mention that the preprocessing stage took roughly 3.5 hours and the memory footprint following this stage is less than 20 MB.
+Before we report on our system-level results comparing our work with alternative implementation (namely, results from the query stage), we mention that the preprocessing stage took roughly 3.5 hours and the memory footprint following this stage is less than 20Mb.
 %
-This backs up our intuition that the domain allows for efficient compression of a massive amount of paths in a reasonable amount of preprocessing time. In all experiments, we used $\Trc =3.5$ seconds
+This backs up our intuition that the domain allows for efficient compression of a massive amount of paths in a reasonable amount of preprocessing time. In all experiments, we used $\Trc =3.5$s
 
 
 
@@ -1158,7 +1159,7 @@ Further, for each method, we determine the pickup success rate given that the pe
 
 The experimental results are shown in Table \ref{tab:robot_results}. Our method achieves the highest overall pickup success rate on the robot, indicating the importance of continuous replanning with multiple pose estimates. 
 First-pose planning has the least overall success rate due to inaccuracy of pose estimates when the object is far from the robot's camera. 
-Best-pose planning performs better overall than the first pose strategy, since it uses accurate pose estimates, received when the object is close to the robot. However it often fails even when perception is accurate, due to the limited time remaining to grasp object when it's closer to the robot. 
+Best-pose planning performs better overall than the first pose strategy, since it uses accurate pose estimates, received when the object is close to the robot. However it often fails even when perception is accurate, since a large number of goals are unreachable due to limited time remaining to grasp the object when it is closer to the robot.
 %We can observe this from the method's lowest pickup success rate among the 3 methods when perception = 1 in \ref{tab:robot_results}.
 
 
@@ -1269,6 +1270,11 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 %     \caption{Planning times, success rate and number of replanning queries averaged over 100 simulated runs of an object moving on $\calB$.}
 %     \label{tab:stats_query}
 % \end{table}
+
+\section{Conclusion and Discussion}
+To summarize, we developed a provably constant-time planning and replanning algorithm that can be used to grasp fast moving objects off conveyor belts and evaluated it in simulation and in the real world on the PR2 robot. Through this work, we advocate the need for (small) constant-time planning guarantees for time critical applications, such as the conveyor pickup task, which are often encountered in warehouse and manufacturing environments.
+
+The main shortcoming of our algorithm is that it can only handle a single object on the conveyor belt at a time. To be able to handle multiple objects simultaneously by potentially using multiple robot arms, the algorithm must also ensure that the robots avoid collisions with other objects while grasping their respective target objects. We aim to address this problem in future work.
 
 
 \ignore{
