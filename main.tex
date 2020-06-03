@@ -969,7 +969,7 @@ In Alg.~\ref{alg:preprocess}, before calling the \textsc{Preprocess} procedure f
 For a robot state~$s$ and a goal~$g$, if~$g$ is \emph{reachable} from~$s$ and~$t(s) \leq t_{rc}$, the algorithm is guaranteed to find a path from~$s$ to~$g$.
 \end{lemma}
 
-\begin{proof}
+\begin{proof}[Proof (Sketch)]
 In order to prove it we show that (1) if~$g$ is reachable from~$s$, it is \emph{covered} by~$s$ in Alg.~\ref{alg:preprocess} and (2) if~$g$ is covered by~$s$, Alg.~\ref{alg:query} is guaranteed to return a path.
 
 Alg.~\ref{alg:preprocess} starts by computing a set of root paths from \Shome that ensures that it covers all of its reachable goals. It then iterates over all states on these paths and adds additional root paths ensuring that these states also cover their reachable goals. It does it recursively until no state before \Trc is left with uncovered goals. Therefore, it is ensured that any reachable $g$ is covered by $s$, provided that $t(s) \leq t_{rc}$. 
@@ -988,9 +988,9 @@ If~$g$ is reachable, the planner is guaranteed to provide a solution in constant
 
 \begin{proof}
     We have to show that the query stage (Alg.~\ref{alg:query}) has a constant-time complexity. 
-    The number of times the algorithm queries $\calM$ which is $O(1)$ operation in case of perfect hashing) is bounded by $l = \Trc/\delta_t$ which is the maximum number of time steps from $t = 0$ to $\Trc$. 
+    The number of times the algorithm queries $\calM$ which is $O(1)$ operation in case of perfect hashing is bounded by $l = \Trc/\delta_t$ which is the maximum number of time steps from $t = 0$ to $\Trc$. 
     The number of times the algorithm will attempt to latch on to a root path (namely, a call to \textsc{CanLatch}  which is a constant-time operation) is also bounded by $l$. Finally, Alg.~\ref{alg:query} calls the \textsc{Plan} method only once.
-    Since we are using a deterministic planner, the computation time is constant. 
+    Since the state that it is called for covers $g$, meaning that the planner can find a path from it to $g$ within \Tbound, the computation time is constant. 
     Hence the overall complexity of Alg.~\ref{alg:query} is $O(1)$.
 \end{proof}
 
@@ -1073,7 +1073,7 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 
 
 \subsection{Experimental setup}
-\subsubsection{Perception system~$\calP$}
+%\subsubsection{Perception system~$\calP$}
 %In order to pick a known object $o$ moving object along the conveyor~$\calB$, we need a method to estimate its 3-DoF pose at various locations across~$\calB$. Thus, we created an ICP-based pose estimation strategy that uses the known 3D model of~$o$ and the initial pose estimate obtained after pre-processing the input point cloud. 
 %%
 %The following process is performed at every frame obtained by $\calP$. 
@@ -1081,26 +1081,29 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 %This is followed by statistical outlier removal in order to remove any points that have been left in scene after the first step. 
 %In the final step, we compute the mean of the points left and use that as an initial translation estimate for ICP. 
 %The rotation estimate is applied in a way that it places the object parallel to its direction of motion along the conveyor. The object's 3D model is transformed with this initial estimate, creating a point cloud and ICP refinement is performed between this point and the pre-processed observed point cloud. The resulting transform is concatenated with the initial estimate to return the final predicted pose. For speeding up ICP, we downsample all point clouds to a leaf size of 15mm.
-In order to pick a known object $o$ moving object along the conveyor~$\calB$, we need a method to estimate its 3-DoF pose at various locations across~$\calB$. We use the Brute Force ICP pose estimation baseline proposed in \cite{perch} to obtain a 3-Dof pose for each captured input point cloud.
+%In order to pick a known object $o$ moving object along the conveyor~$\calB$, we need a method to estimate its 3-DoF pose at various locations across~$\calB$.
 
 \subsubsection{Sense-plan-act cycle}
-We follow the classical sense-plan-act cycle as depicted in Fig.~\ref{fig:tl}.
-%
-Specifically, 
-$\calP$ captures an image (point cloud) of the object~$o$ at time~$t_{\textrm{img}}$
-followed by a period of duration $T_{\textrm{perception}}$ in which the $\calP$ estimates the pose of $o$.
-At time $t_{\textrm{msg}} = t_{\textrm{img}} + T_{\textrm{perception}}$, planning starts for a period of $T_{\textrm{planning}}$ which is guaranteed to be less than~$\Tbound$.
-Thus, at $t_{\textrm{plan}} = t_{\textrm{msg}} + T_{\rm planning}$ the planner waits for an additional duration of $T_{\rm wait} = \Tbound - T_{\rm planning}$.
-Finally, at~$t_{\textrm{exec}} = t_{\textrm{plan}} + T_{\rm wait}$, the robot starts executing the plan. Note that the goal $g$ that the planner plans for is not for the object pose at $t_{\textrm{img}}$ but its forward projection in time to $t_{\textrm{exec}}$ to account for $T_{\textrm{perception}}$ and $T_{\textrm{bound}}$.
-While executing the plan, if we obtain an updated pose estimate, the execution is preempted and the cycle repeats.
+As object $o$ moves along $\calB$, we use the Brute Force ICP pose estimation baseline proposed in \cite{perch} to obtain its 3-Dof pose for each captured input point cloud.
+The plan is computed for the sensed object pose projected forward by \Tbound time, giving the planner \Tbound time to plan. If the plan comes in earlier, the robot waits until the object reaches the projected pose, before executing the plan to ensure that timing is tracked properly.
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.45\textwidth]{figs/timeline2.pdf}
-    \caption{\CaptionTextSize Timeline of the sense-plan-act cycle.}
-    \label{fig:tl}
-    %\vspace{-5mm}
-\end{figure}
+%We follow the classical sense-plan-act cycle as depicted in Fig.~\ref{fig:tl}.
+%
+%Specifically, 
+%$\calP$ captures an image (point cloud) of the object~$o$ at time~$t_{\textrm{img}}$
+%followed by a period of duration $T_{\textrm{perception}}$ in which the $\calP$ estimates the pose of $o$.
+%At time $t_{\textrm{msg}} = t_{\textrm{img}} + T_{\textrm{perception}}$, planning starts for a period of $T_{\textrm{planning}}$ which is guaranteed to be less than~$\Tbound$.
+%Thus, at $t_{\textrm{plan}} = t_{\textrm{msg}} + T_{\rm planning}$ the planner waits for an additional duration of $T_{\rm wait} = \Tbound - T_{\rm planning}$.
+%Finally, at~$t_{\textrm{exec}} = t_{\textrm{plan}} + T_{\rm wait}$, the robot starts executing the plan. Note that the goal $g$ that the planner plans for is not for the object pose at $t_{\textrm{img}}$ but its forward projection in time to $t_{\textrm{exec}}$ to account for $T_{\textrm{perception}}$ and $T_{\textrm{bound}}$.
+%While executing the plan, if we obtain an updated pose estimate, the execution is preempted and the cycle repeats.
+%
+%\begin{figure}[t]
+%    \centering
+%    \includegraphics[width=0.45\textwidth]{figs/timeline2.pdf}
+%    \caption{\CaptionTextSize Timeline of the sense-plan-act cycle.}
+%    \label{fig:tl}
+%    %\vspace{-5mm}
+%\end{figure}
 
 \subsubsection{Goal region specification}
 To define the set of all goal poses~$\Gfull$, we need to detail our system setup, depicted in Fig.~\ref{fig:pe}.
@@ -1113,7 +1116,7 @@ We pick a fixed $x$-value termed~\Xexec, such that when the incoming $o$ reaches
 Recall that a pose of an object~$o$ is a three dimensional point~$(x,y,\theta)$ corresponding to the $(x,y)$ location of~$o$ and to its orientation (yaw angle) along $\calB$.
 %
 $\Gfull$ contains a fine discretization of all possible $y$ and $\theta$ values and $x$ values in  $[\Xexec-2\varepsilon_{\calP}, \Xexec+2\varepsilon_{\calP}]$.
-We select $\Gfull$ such that $\varepsilon = 2.5$cm, dimension along $y$-axis is 20cm. The discretization in $x,y$ and $\theta$ is 1.0cm and 10 degrees respectively.
+We select $\Gfull$ such that $\varepsilon_{\calP} = 2.5$cm, making the goal region 10cm long along x-axis. Its dimension along $y$-axis is 20cm, equal to the width of the \calB. The discretization in $x,y$ and $\theta$ is 1.0cm and 10 degrees respectively.
 
 In the example depicted in Fig.~\ref{fig:pe}, the thick and the thin solid rectangles show the ground truth and estimated poses, respectively at two time instances in the life time of the object.
 %
@@ -1214,7 +1217,8 @@ We adapt the \rrt algorithm to account for the under-defined goals. To do so, we
 and compute IK solutions for them to get a set of goal configurations for goal biasing. 
 When a newly-added node falls within a threshold distance from the object, we use the same dynamic primitive that we use in the search-based methods to add the final grasping maneuver. If the primitive succeeds, we return success. We also allow wait actions at the pre-grasp locations.
 
-For any planner to be used in our system, we need to endow it with a (possibly arbitrary) planning time bound to compute the future location of the object from which the new execution will start (see Fig.~\ref{fig:tl}). 
+For any planner to be used in our system, we need to endow it with a (possibly arbitrary) planning time bound to compute the future location of the object from which the new execution will start.
+% (see Fig.~\ref{fig:tl}). 
 %
 If the planner fails to generate the plan within this time, then the robot misses the object for that cycle and such cases are recorded as failures. 
 %
@@ -1295,7 +1299,7 @@ The main shortcoming of our algorithm is that it can only handle a single object
 %% Use plainnat to work nicely with natbib. 
 
 %\newpage
-\bibliographystyle{plainnat}
+\bibliographystyle{unsrt}
 \bibliography{references}
 
 \end{document}
