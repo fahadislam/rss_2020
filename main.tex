@@ -174,13 +174,13 @@ We experimentally show that constant-time planning and replanning capability is 
     \centering
     \begin{subfigure}{.225\textwidth}
     %   \centering
-        \includegraphics[width=0.9\textwidth]{object_blur}
+        \includegraphics[height=2.9cm]{object_blur}
         \caption{}
         \label{fig:obj1}
     \end{subfigure}
     \begin{subfigure}{0.225\textwidth}
     %   \centering
-        \includegraphics[width=\textwidth]{pose_error_plot.pdf}
+        \includegraphics[height=2.9cm]{pose_error_plot.pdf}
         % \includesvg[width=0.9\textwidth]{figs/test.svg}
         \caption{}
         \label{fig:obj2}
@@ -520,7 +520,7 @@ We are finally ready to describe our algorithm describing first the preprocessin
     (\subref{fig:crp3})~The goal region covered by four root paths from \Shome after the first step of the preprocessing stage terminates.
     }
     \label{fig:crp}
-    %\vspace{-5mm}
+    \vspace{-3mm}
 \end{figure*}
 
 Our preprocessing stage starts by sampling a goal~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ the set of goals ~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any $g_j \in G_1$ within~\Tbound.
@@ -795,7 +795,7 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     using newly-computed root paths. 
     }
     \label{fig:pl_no_latching}
-    %\vspace{-1mm}
+    %\vspace{-2mm}
 \end{figure*}
 
 \begin{figure*}[t]
@@ -981,6 +981,7 @@ In query phase, Alg.~\ref{alg:query} iterates through all states between~$s$ and
 
 \end{proof}
 
+%\vspace{-2mm}
 \begin{lemma}[Constant-time complexity]
 \label{lemma:bounded_time}
 Let $s$ be a replanable state and $g$ a goal provided by $\calP$.
@@ -1036,10 +1037,10 @@ More formally, for each root path~$\Pi_i$, we start by considering the last repl
 If this is the case we know that any goal in $G_j$ can be
 }
 
-%\vspace{-2mm}
+%\vspace{-1mm}
 \section{Evaluation}
 \label{sec:eval}
-We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at ~\url{https://youtu.be/iLVPBWxa5b8}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
+We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at~\url{https://youtu.be/iLVPBWxa5b8}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
 
 
 \begin{table*}[t]
@@ -1132,7 +1133,7 @@ The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During ex
 \begin{figure}
 \vspace{2mm}
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/pose_error2.pdf}
+    \includegraphics[width=0.49\textwidth]{figs/pose_error2.pdf}
     \caption{\CaptionTextSize A depiction of \Gfull-specification on a conveyor belt (overhead view) and perception noise handling. 
     }
     \label{fig:pe}
@@ -1187,7 +1188,7 @@ E3   & 34.61                                                                    
 \end{tabular}
 \caption{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning).}
 \label{tab:robot_results}
-\vspace{-4mm}
+\vspace{-2mm}
 \end{table}
 
 \ignore{
@@ -1225,7 +1226,7 @@ For any planner to be used in our system, we need to endow it with a (possibly a
 %
 If the planner fails to generate the plan within this time, then the robot misses the object for that cycle and such cases are recorded as failures. 
 %
-We label a run as a ``Pickup success" if the planner successfully replans once after the object crosses the 1.0m mark. The mark is the mean of accurate perception range that was determined experimentally and used in the robot experiments as described in Section \ref{sec:robot_results}.
+We label a run as a success if the planner successfully replans once after the object crosses the 1.0m mark. The mark is the mean of accurate perception range that was determined experimentally and used in the robot experiments as described in Section \ref{sec:robot_results}.
 %
 The key takeaway from our experiments (Table~\ref{tab:sim_results}) is that having a known time bound on the query time is vital to the success of the conveyor pickup task.
 
@@ -1278,6 +1279,7 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 %     \label{tab:stats_query}
 % \end{table}
 
+%\vspace{-2mm}
 \section{Conclusion and Discussion}
 To summarize, we developed a provably constant-time planning and replanning algorithm that can be used to grasp fast moving objects off conveyor belts and evaluated it in simulation and in the real world on the PR2 robot. Through this work, we advocate the need for algorithms that guarantee (small) constant-time planning for time critical applications, such as the conveyor pickup task, which are often encountered in warehouse and manufacturing environments.
 
