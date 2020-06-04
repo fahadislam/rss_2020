@@ -143,10 +143,10 @@ Conveyor belts are widely used in automated distribution, warehousing, as well a
 
 %% why replanning?
 %    Manipulation relies on high quality detection and localization of moving objects. When the object first enters the field of view of the robot, the initial perception estimates of the object's pose are often inaccurate. Consider the example of an object (sugar box) moving along the conveyor towards the robot in Fig.~\ref{fig:intro_pic}, shown through an image sequence as captured by the robot's Kinect camera in Fig.~\ref{fig:pose_sequence}. In order to understand how pose estimation error varies as the object gets closer, we filter the input point cloud and remove all points lying outside the conveyor. We then compute the pair-wise minimum distance between the input point cloud and a predicted point cloud that corresponds to the object's 3D model transformed with the predicted pose through ICP~\cite{besl1992method} refinement. The plot in Fig.~\ref{fig:pose_sequence} shows the variation of the average pairwise minimum distance between the two point clouds as the object gets closer. We can observe that the distance decreases as the object moves closer, indicating that the point clouds overlap more closely due to more accurate pose estimates closer to the camera.
-Manipulation relies on high quality detection and localization of moving objects. When the object first enters the field of view of the robot, the initial perception estimates of the object's pose are often inaccurate. Consider the example of an object (sugar box) moving along the conveyor towards the robot in Fig.~\ref{fig:intro_pic}, shown through an image sequence as captured by the robot's Kinect camera in Fig.~\ref{fig:pose_sequence}. 
+Manipulation relies on high quality detection and localization of moving objects. When the object first enters the robot's field of view, the initial perception estimates of the object's pose are often inaccurate. Consider the example of an object (sugar box) moving along the conveyor towards the robot in Fig.~\ref{fig:intro_pic}, shown through an image sequence as captured by the robot's Kinect camera in Fig.~\ref{fig:pose_sequence}. 
 % In order to understand how pose estimation error varies as the object gets closer, we filter the input point cloud and remove all points lying outside the conveyor. 
 % In order to understand how pose estimation error varies as the object gets closer, we compute the pair-wise minimum distance between the filtered input point cloud containing points corresponding to the object and a predicted point cloud that corresponds to the object's 3D model transformed with the predicted pose through ICP~\cite{besl1992method} refinement. 
-The plot in Fig.~\ref{fig:pose_sequence} shows the variation of the error between the filtered input point cloud and a point cloud computed from the predicted pose from our ICP based perception strategy as the object gets closer to the camera. We can observe that the error decreases as the object moves closer, indicating that the point clouds overlap more closely due to more accurate pose estimates closer to the camera.
+The plot in Fig.~\ref{fig:pose_sequence} shows the variation of the error between the filtered input point cloud and a point cloud computed from the predicted pose from our ICP based perception strategy as the object gets closer to the camera. We observe that the error decreases as the object moves closer, indicating that the point clouds overlap more closely due to more accurate pose estimates closer to the camera.
 
 % The black color denotes points corresponding to the object in the observed scene after filtering out all points lying outside the conveyor. The white point cloud shows the object's 3D model transformed with the predicted 3-Degree of Freedom pose obtained by using Iterative Closest Point (ICP)~\cite{besl1992method} refinement. Upon observation of the overlap between the point clouds, we see that they begin to overlap more closely as the object moves towards the robot, indicating that the pose estimate is becoming increasingly accurate. 
 However, if the robot waits too long to get an accurate estimate of the object pose, the delay in starting plan execution could cause the robot to miss the object. The likelihood of this occurring increases proportionately with the speed of the conveyor. Therefore, the robot should start executing a plan computed for the initial pose and as it gets better estimates, it should repeatedly replan for the new goals. However, for every replanning query, the time window for the pickup shrinks. This makes the planner's job difficult to support real-time planning.
@@ -158,7 +158,7 @@ However, if the robot waits too long to get an accurate estimate of the object p
     \CaptionTextSize
     A scene demonstrating the PR2 robot picking up a moving object (sugar box) off a conveyor belt.}
     \label{fig:intro_pic}
-    %\vspace{-7.5mm}
+    \vspace{-4mm}
 \end{figure}
 
 
@@ -166,7 +166,7 @@ However, if the robot waits too long to get an accurate estimate of the object p
 Furthermore, the planning problem is challenging because the motion planner has to account for the dynamic object and thus plan with time as one of the planning dimension. It should generate a valid trajectory that avoids collision with the environment around it and also with the target object to ensure that it does not damage or topple it during the grasp. Avoiding collisions with the object requires precise geometric collision checking between the object geometry and the geometry of the manipulator. The resulting complexity of the planning problem makes it infeasible to plan online for this task.
 
 %%
-Motivated by these challenges, we propose a planning framework that leverages offline preprocessing to provide bounds on the planning time when the planner is invoked online. Our key insight is that in our domain the manipulation task is highly repetitive. Even for different object poses, the computed paths are quite similar and can be efficiently reused to speed up online planning. Based on this insight, we derive a method that precomputes a representative set of paths offline with some auxiliary datastructures and uses them online in a way that provides \emph{constant-time planning guarantee}. Here, we assume that the models of the target objects are known. Namely, the planner is provided with the geometric model of the target object apriori. To the best of our knowledge, our approach is the first to provide provable constant-time planning guarantees on generating motions all the way to the goal for dynamic environments.
+Motivated by these challenges, we propose an algorithm that leverages offline preprocessing to provide bounds on the planning time when the planner is invoked online. Our key insight is that in our domain the manipulation task is highly repetitive. Even for different object poses, the computed paths are quite similar and can be efficiently reused to speed up online planning. Based on this insight, we derive a method that precomputes a representative set of paths with some auxiliary datastructures offline and uses them online in a way that provides \emph{constant-time planning guarantee}. Here, we assume that the geometric models of the target objects are known apriori. To the best of our knowledge, our approach is the first to provide constant-time planning guarantee on generating motions all the way to the goal for a dynamic environment.
 
 %
 We experimentally show that constant-time planning and replanning capability is necessary for a successful conveyor pickup task. Specifically if we only perform one-time planning, (namely, either following the plan for the initial potentially inaccurate pose estimate or from a delayed but accurate pose estimate) the robot frequently fails to pick the object.
@@ -193,7 +193,7 @@ We experimentally show that constant-time planning and replanning capability is 
     %, calculated as the average pair wise minimum distance between the input point cloud and the point cloud corresponding to the predicted pose.
     }
     \label{fig:pose_sequence}
-    %\vspace{-7.5mm}
+    \vspace{-4mm}
 \end{figure}
 
 \section{Related work}
@@ -222,9 +222,7 @@ Unfortunately, none of the mentioned algorithms provide fixed planning-time guar
 
 \subsection{Online replanning and real time planning}
 The conveyor-planning problem can be modelled as a Moving Target Search problem (MTS) which is a widely-studied topic in the graph search-based planning literature~\cite{ishida1991moving,ishida1995moving,koenig2007speeding,sun2010moving}. 
-These approaches interleave planning and execution incrementally and update the heuristic values of the state space to improve the distance estimates to the moving target. Unfortunately, in high-dimensional planning problems, this process is computationally expensive which is why these approaches are typically used for two-dimensional grid problem such as those encountered in video games.
-
-Similar to MTS, real-time planning was widely considered in the search community (see, e.g.,~\cite{KL06,KS09,korf1990real}).
+These approaches interleave planning and execution incrementally and update the heuristic values of the state space to improve the distance estimates to the moving target. Unfortunately, in high-dimensional planning problems, this process is computationally expensive which is why these approaches are typically used for two-dimensional grid problem such as those encountered in video games. More generally, real-time planning is widely considered in the search community (see, e.g.,~\cite{KL06,KS09,korf1990real}).
 However, as mentioned, these works are typically applicable to low-dimensional search spaces.
 %
 %Finally it is worth mentioning that some finite-time properties have been obtained for sampling-based planners~\cite{JansonIP18} but these come in form of Big-$O$ notation, thus they are not applicable to our setting, when we are aiming for tight planning times (e.g., less than one second).
@@ -348,7 +346,7 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
     Thus, the number of paths increases exponentially at every timestep.
     }
     \label{fig:naive}
-    %\vspace{-5mm}
+    \vspace{-4mm}
 \end{figure}
 
 We first compute from \Shome a path $\pi_g$ to every reachable $g \in \Gfull$. 
@@ -381,7 +379,7 @@ The algorithm then retrieves the path~$\pi_1(\Shome,g_1)$ (from~\Shome to~$g_1$)
 For every new estimation $g_i$ of the goal pose obtained from~$\calP$  while the system is executing path $\pi_{i-1}(s_{i-1},g_{i-1})$, the algorithm retrieves from $\calM$ the path $\pi_i(s_i,g_i)$ from the first state~$s_i$ along $\pi_{i-1}(s_{i-1},g_{i-1})$ that is least $\Tbound$ away from~$s_{i-1}$. The robot~$\calR$ will then start executing~$\pi_i(s_i,g_i)$ once it reaches~$s_i$.
 
 Clearly, every state is covered by this brute-force approach, however it requires a massive amount of memory.
-Let $n_{\rm goal} = \vert \Gfull \vert$ be the number of goal states and
+Let $n_{\rm goal} = \vert \Gfull \vert$ be the number of goals and
 $\ell$ be the number of states between \Shome and the state that is \Trc time away.
 This approach requires precomputing and storing $O(n_{\rm goal}^\ell)$ paths which is clearly infeasible (see Fig.~\ref{fig:naive}).
 In the next sections, we show how we can dramatically reduce the memory footprint of the approach without compromising on the system's capabilities.
@@ -437,8 +435,8 @@ The velocity of the end effector is computed such that the end-effector minimize
 %Additional details omitted due to lack of space. 
 
 \textbf{Motion planner.}
-The states and the transitions implicitly define a graph $\calG = (S,E)$ where $S$ is the set of all states and~$E$ is the set of all transitions defined by the motion primitives. We use Weighted \astar (\wastar)~\cite{pohl1970heuristic} to find a path in $\calG$ from a given state~$s$ to a goal state $g$. 
-\wastar is a suboptimal heursitic search algorithm that allows a tradeoff between optimality and greediness by inflating the heuristic function by a given weight~$w$. 
+The states and the transitions implicitly define a graph $\calG = (S,E)$ where $S$ is the set of all states and~$E$ is the set of all transitions defined by the motion primitives. We use Weighted A* (wA*)~\cite{pohl1970heuristic} to find a path in $\calG$ from a given state~$s$ to a goal state $g$. 
+wA* is a suboptimal heursitic search algorithm that allows a tradeoff between optimality and greediness by inflating the heuristic function by a given weight~$w$. 
 The search is guided by an efficient and fast-to-compute heuristic function which in our case has two components.
 The first component drives the search to intercept the object at the right time and 
 the second component guides the search to correct the orientation of the end effector as it approaches the object. 
@@ -465,7 +463,7 @@ We now show how \emph{experience graphs}~\cite{PCCL12} can be used in our framew
 %
 Roughly speaking, experience graphs allow a planner  to accelerate its planning efforts whenever possible by using previously-computed paths. The planner gracefully degenerates to planning from scratch if no previous planning experiences can be reused.
 %
-The key idea is to bias the search efforts, using a specially-constructed heuristic function (called the ``e-graph heuristic''), towards finding a way to get onto the previously-computed paths and to remain on them rather than explore new regions as much as possible. 
+The key idea is to bias the search efforts, using a specially-constructed heuristic function (called the ``E-graph heuristic''), towards finding a way to get onto the previously-computed paths and to remain on them rather than explore new regions as much as possible. 
 
 In our setting, we use a simplified version of the aforementioned approach which is faster to compute.
 %
@@ -844,7 +842,7 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     using newly-computed root paths. 
     }
     \label{fig:pl_latching}
-    %\vspace{-5mm}
+    \vspace{-4mm}
 \end{figure*}
 
 \subsubsection{Query}
@@ -1041,7 +1039,7 @@ If this is the case we know that any goal state in $G_j$ can be
 
 \section{Evaluation}
 \label{sec:eval}
-We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at ~\url{https://tinyurl.com/yaz76x9e}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
+We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at ~\url{https://youtu.be/iLVPBWxa5b8}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
 
 
 \begin{table*}[t]
@@ -1049,9 +1047,9 @@ We evaluated our algorithm in simulation and on a real robot. The conveyor speed
 \begin{tabular}{|c||c||c|c|c||c|c|c||c|c|c|}
 \hline
    & Our Method 
-   & \multicolumn{3}{c|}{\wastar}
-   & \multicolumn{3}{c|}{\textsf{E-Graph}}
-   & \multicolumn{3}{c|}{\rrt}
+   & \multicolumn{3}{c|}{wA*}
+   & \multicolumn{3}{c|}{E-Graph}
+   & \multicolumn{3}{c|}{RRT}
    \\ \hline
    & $T_{b}$ = \textbf{0.2} 
    & $T_{b}$ = 0.5 & $T_{b}$ = 1.0 & $T_{b}$ = 2.0 
@@ -1136,34 +1134,34 @@ The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During ex
     \caption{\CaptionTextSize A depiction of \Gfull-specification on a conveyor belt (overhead view) and perception noise handling. 
     }
     \label{fig:pe}
-%        \vspace{-5mm}
+        \vspace{-4mm}
 \end{figure}
 
 \subsection{Results}
 
-Before we report on our system-level results comparing our work with alternative implementation (namely, results from the query stage), we mention that the preprocessing stage took roughly 3.5 hours and the memory footprint following this stage is less than 20Mb.
+The preprocessing stage (i.e. running Alg.~\ref{alg:preprocess}) took roughly 3.5 hours and the memory footprint following this stage was less than 20Mb.
 %
-This backs up our intuition that the domain allows for efficient compression of a massive amount of paths in a reasonable amount of preprocessing time. In all experiments, we used $\Trc =3.5$s
+This supports our intuition that the domain allows for efficient compression of a massive amount of paths in a reasonable amount of preprocessing time. In all experiments, we used $\Trc =3.5$s
 
 
 
 
 \subsubsection{Real-robot experiments}
 \label{sec:robot_results}
-To show the necessity of real-time replanning we performed three types of experiments, 
-(E1)~replanning with multiple pose estimates, 
-(E2)~first-pose planning from the first object pose estimate 
+To show the necessity of real-time replanning in response to perception updates, we performed three types of experiments, 
+(E1)~using our approach to replan every time new object pose estimate arrives, 
+(E2)~single-shot planning based on the first object pose estimate 
 %(received at approximately 1.5m from the robot's base) 
-(E3)~best-pose planning from the late (more accurate) pose estimate. 
+(E3)~single-shot planning using the late (more accurate) pose estimate. 
 %
 For each set of experiments, we determined the pickup success rate to grasp the moving object (sugar box) off~$\calB$. In addition, we report on $\calP$'s success rate by observing the overlap between the point cloud of the object's 3D model transformed by the predicted pose (that was used for planning) and the filtered input point cloud containing points belonging to the object. 
-A high (resp. low) overlap results in an accurate (resp. inaccurate) pose estimate. 
+A high (low) overlap corresponds in an accurate (inaccurate) pose estimate. 
 %
-We use the same strategy to determine a range for which $\calP$'s estimates are accurate and use it for best-pose planning. 
+We use the same strategy to determine the range for which $\calP$'s estimates are accurate and use it to determine the time for the best-pose planning. 
 %This range is found to be 1.05m to 0.95m from the robot's base on the conveyor. 
 Further, for each method, we determine the pickup success rate given that the perception was or wasn't accurate. 
 
-The experimental results are shown in Table \ref{tab:robot_results}. Our method achieves the highest overall pickup success rate on the robot, indicating the importance of continuous replanning with multiple pose estimates. 
+The experimental results are shown in Table \ref{tab:robot_results}. Our method achieves the highest overall pickup success rate on the robot by a large margin, indicating the importance of continuous replanning with multiple pose estimates. 
 First-pose planning has the least overall success rate due to inaccuracy of pose estimates when the object is far from the robot's camera. 
 Best-pose planning performs better overall than the first pose strategy, since it uses accurate pose estimates, received when the object is close to the robot. However it often fails even when perception is accurate, since a large number of goals are unreachable due to limited time remaining to grasp the object when it is closer to the robot.
 %We can observe this from the method's lowest pickup success rate among the 3 methods when perception = 1 in \ref{tab:robot_results}.
@@ -1187,7 +1185,7 @@ E3   & 34.61                                                                    
 \end{tabular}
 \caption{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate}
 \label{tab:robot_results}
-%\vspace{-5mm}
+\vspace{-4mm}
 \end{table}
 
 \ignore{
@@ -1212,10 +1210,10 @@ Best-pose planing (E3)   & 34.61                                                
 
 
 
-We simulated the real world scenario to evaluate our method against other baselines. We compared our method with \wastar, \textsc{E-graphs} and \rrt. 
-For \wastar and \textsc{E-graphs} we use the same graph representation as our method. 
-For \textsc{E-graphs} we precompute five paths to randomly-selected  goals in \Gfull. 
-We adapt the \rrt algorithm to account for the under-defined goals. To do so, we sample pre-grasp poses along the conveyor 
+We simulated the real world scenario to evaluate our method against other baselines. We compared our method with wA*~\cite{pohl1970heuristic}, E-graph~\cite{PCCL12} and RRT~\cite{lavalle1998rapidly}. 
+For wA* and E-graph we use the same graph representation as our method. 
+For E-graph we precompute five paths to randomly-selected  goals in \Gfull. 
+We adapt the RRT algorithm to account for the under-defined goals. To do so, we sample pre-grasp poses along the conveyor 
 %in the reachable workspace with a fine discretization 
 and compute IK solutions for them to get a set of goal configurations for goal biasing. 
 When a newly-added node falls within a threshold distance from the object, we use the same dynamic primitive that we use in the search-based methods to add the final grasping maneuver. If the primitive succeeds, we return success. We also allow wait actions at the pre-grasp locations.
@@ -1232,7 +1230,7 @@ The key takeaway from our experiments (Table~\ref{tab:sim_results}) is that havi
 Our method shows the highest pickup success rate, planning success rate (success rate over all planning queries) and an order of magnitude lower planning times compared to the other methods. 
 The planning success rate being lower than 100\% can be attributed to the fact that some goals were unreachable during the runs. 
 %
-We tested the other methods with several different time bounds. Besides our approach \textsc{E-graphs} perform significantly well. \rrt suffers from the fact that the goal is under-defined and sampling based planners typically require a goal bias in the configuration space. Another important highlight of the experiments is the number of planning cycles over the lifetime of an object. While the other approaches could replan at most twice, our method was able to replan thrice due to fast planning times.
+We tested the other methods with several different time bounds. After our approach E-graph performed decently well. RRT suffers from the fact that the goal is under-defined and sampling based planners typically require a goal bias in the configuration space. Another important highlight of the experiments is the number of planning cycles over the lifetime of an object. While the other approaches could replan at most twice, our method was able to replan thrice due to fast planning times.
 
 
 \ignore{
@@ -1241,9 +1239,9 @@ We tested the other methods with several different time bounds. Besides our appr
 \begin{tabular}{|c||c||c|c|c||c|c|c||c|c|c|}
 \hline
    & \textbf{Our Method} 
-   & \multicolumn{3}{c|}{\wastar}
-   & \multicolumn{3}{c|}{\textsf{E-Graph}}
-   & \multicolumn{3}{c|}{\rrt}
+   & \multicolumn{3}{c|}{wA*}
+   & \multicolumn{3}{c|}{E-Graph}
+   & \multicolumn{3}{c|}{RRT}
    \\ \hline
    & $T_{b}$ = 0.2 
    & $T_{b}$ = 0.5 & $T_{b}$ = 1.0 & $T_{b}$ = 2.0 
@@ -1267,7 +1265,7 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 % % \centering
 %     \resizebox{0.5\textwidth}{!}{ 
 %         \begin{tabular}{ l | c c c c}
-%           & \algname{WA*} & \algname{E-graphs} & \algname{\rrt} & \textbf{Our method} \\
+%           & \algname{wA*} & \algname{E-graph} & \algname{RRT} & \textbf{Our method} \\
 %          \hline
 %          Planning time [ms]& - (-) & - (-) & - (-) & \textbf{- (-)}\\
 %          Success rate [$\%$]& - & - & - & \textbf{-}\\
@@ -1279,9 +1277,9 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 % \end{table}
 
 \section{Conclusion and Discussion}
-To summarize, we developed a provably constant-time planning and replanning algorithm that can be used to grasp fast moving objects off conveyor belts and evaluated it in simulation and in the real world on the PR2 robot. Through this work, we advocate the need for (small) constant-time planning guarantees for time critical applications, such as the conveyor pickup task, which are often encountered in warehouse and manufacturing environments.
+To summarize, we developed a provably constant-time planning and replanning algorithm that can be used to grasp fast moving objects off conveyor belts and evaluated it in simulation and in the real world on the PR2 robot. Through this work, we advocate the need for algorithms that guarantee (small) constant-time planning for time critical applications, such as the conveyor pickup task, which are often encountered in warehouse and manufacturing environments.
 
-The main shortcoming of our algorithm is that it can only handle a single object on the conveyor belt at a time. To be able to handle multiple objects simultaneously by potentially using multiple robot arms, the algorithm must also ensure that the robots avoid collisions with other objects while grasping their respective target objects. We aim to address this problem in future work.
+%The main shortcoming of our algorithm is that it can only handle a single object on the conveyor belt at a time. To be able to handle multiple objects simultaneously by potentially using multiple robot arms, the algorithm must also ensure that the robots avoid collisions with other objects while grasping their respective target objects. We aim to address this problem in future work.
 
 
 \ignore{
