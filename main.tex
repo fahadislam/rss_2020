@@ -21,7 +21,7 @@
 \usepackage{subcaption}
 \usepackage[dvipsnames]{xcolor}
 % \usepackage{makecell}
-
+\usepackage{balance}
 
 \newtheorem{lemma}{Lemma}
 
@@ -208,13 +208,13 @@ The latter work demonstrated online real-time planning capability. The approach 
 
 \subsection{Preprocessing-based planning}
 Preprocessing-based motion planners often prove beneficial for real-time planning. They analyse the configuration space offline to generate some auxiliary information that can be used online to speed up planning. 
-Probably the best-known example is the Probablistic Roadmap Method (\algname{PRM})~\cite{kavraki1996probabilistic} which precomputes a roadmap that can answer any query by connecting the start and goal configurations to the roadmap and then searching the roadmap. \textsf{PRM}s are fast to query yet they do not provide constant-time guarantees.
+Probably the best-known example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic} which precomputes a roadmap that can answer any query by connecting the start and goal configurations to the roadmap and then searching the roadmap. \textsf{PRM}s are fast to query yet they do not provide constant-time guarantees.
 Moreover, in our case, to account for a moving object, they would require edge re-evaluation which is often computationally expensive.
 %
 
-A provably constant-time planner was recently proposed in~\cite{islam2019planning}. Given a start state and a goal region, it precomputes a compressed set of paths that can be utilised online to plan to any goal state within the goal region in bounded time. As we will see, our approach while algorithmically different, draws some inspiration from this work.
+A provably constant-time planner was recently proposed in~\cite{ISL19}. Given a start state and a goal region, it precomputes a compressed set of paths that can be utilised online to plan to any goal within the goal region in bounded time. As we will see, our approach while algorithmically different, draws some inspiration from this work.
 %
-Both of the above two methods (\cite{islam2019planning,kavraki1996probabilistic}) are mainly targetting pure kinematic planning and thus they cannot be used for the conveyor-planning problem which is dynamic in nature.
+Both of the above two methods (\cite{ISL19,kavraki1996probabilistic}) are mainly targetting pure kinematic planning and thus they cannot be used for the conveyor-planning problem which is dynamic in nature.
 %
 
 Another family of preprocessing-based planners utilises previous experiences to speed up the search~\cite{BAG12,CSMOC15,PCCL12}. Experience graphs~\cite{PCCL12}, provide speed up in planning times for repetitive tasks by trying to reuse previous experiences. These methods are also augmented with sparsification techniques (see e.g.,~\cite{DB14,SSAH14}) to reduce the memory footprint of the algorithm.
@@ -315,7 +315,7 @@ Assumption~\ref{assum:3} bounds the maximum error of $\calP$ and is explained in
 
 \section{Algorithmic framework}
 \label{subsec:strawman}
-Our approach for constant-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal state (under Assumptions~\ref{assum:4}-\ref{assum:3}). 
+Our approach for constant-time planning relies on a \emph{preprocessing} stage that allows to efficiently compute paths in a \emph{query} stage to any goal (under Assumptions~\ref{assum:4}-\ref{assum:3}). 
 %
 Before we describe our approach, we start by describing a \naive method that solves the aforementioned problem but requires a prohibitive amount of memory.
 %
@@ -351,7 +351,7 @@ This can be seen as a warmup before describing our algorithm which exhibits the 
 
 We first compute from \Shome a path $\pi_g$ to every reachable $g \in \Gfull$. 
 %(such a path exists following \ref{assum:1}).
-These paths can be stored in a lookup (hash) table which can be queried in constant time (assuming perfect hashing~\cite{czech1997perfect}). Thus, all goal states are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
+These paths can be stored in a lookup (hash) table which can be queried in constant time (assuming perfect hashing~\cite{czech1997perfect}). Thus, all goals are covered by \Shome and this allows us to start executing a path once $\calP$ gives its initial pose estimate.
 However, we need to account for pose update while executing~$\pi_g$. 
 %
 Following \ref{assum:4} and \ref{assum:5}, this only needs to be done up until time~\Trc.
@@ -361,11 +361,11 @@ Thus, we discretize each path uniformly with resolution $\delta_t$.
 We call all states that are less than \Trc time from \Shome \emph{replanable states}.
 
 
-Next, for every replanable state along each path $\pi_g$, we compute a new path to all goal states. 
+Next, for every replanable state along each path $\pi_g$, we compute a new path to all goals. 
 %\bound{that are $\varepsilon$ away from $g$}.
 %See Fig.~\ref{fig:naive}.
 %
-This will ensure that all goal states are covered by all replanable states. Namely, it will allow to immediately start executing a new path once the goal location is updated by~$\calP$.
+This will ensure that all goals are covered by all replanable states. Namely, it will allow to immediately start executing a new path once the goal location is updated by~$\calP$.
 %
 Unfortunately,~$\calP$ may update the goal location more than once. Thus, this process needs to be performed recursively for the new paths as well.
 
@@ -393,7 +393,7 @@ While the straw man algorithm presented  allows for planning to any goal pose $ 
 We suggest to reduce the memory footprint by building on the observation that many paths to close-by goals traverse very similar parts of the configurations space.
 
 %Similar to the straw man algorithm, our preprocessing stage runs in two steps.
-%In the first step we  compute from \Shome a path $\Pi_g$ to every goal state $ g \in \Gfull$. However, this is done by computing a set of so-called ``root paths'' $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to a subset of goals in \Gfull (here we will have that $k \ll n_{\rm goal})$.
+%In the first step we  compute from \Shome a path $\Pi_g$ to every goal $ g \in \Gfull$. However, this is done by computing a set of so-called ``root paths'' $\{\Pi_1, \ldots, \Pi_k \}$ from \Shome to a subset of goals in \Gfull (here we will have that $k \ll n_{\rm goal})$.
 
 The key idea of our approach is that instead of computing (and storing) paths to all reachable goals in \Gfull, we compute a relatively small subset of so-called ``root paths" that can be reused in such a way that we can still cover \Gfull fully. Namely, at query time, we can reuse these paths to plan to any $g\in \Gfull$ within \Tbound. The idea is illustrated in Fig.~\ref{fig:crp}.
 
@@ -420,7 +420,7 @@ Moreover, such planners can easily handle under-defined goals as we have in our 
 \textbf{State space and graph construction.}
 We define a state $s$ as a pair $(q,t)$ where $q = (\theta_1, ..., \theta_n)$ is a configuration represented by the joint angles for an $n$-DOF robot arm (in our setting $n=7$) and $t$ is the time associated with $q$.
 %
-Given a state $s$ we define two types of motion primitives which are short kinodynamically feasible motions that the robot~$\calR$ can execute.
+Given a state $s$ we define two types of motion primitives which are short kinodynamically feasible motions that~$\calR$ can execute.
 %The first, which we term \emph{predefined} primitives are used to move to a pre-grasp position while the second, termed \emph{dynamic} primitives are used to perform grasping after the robot reached a pre-grasp position.
 %
 
@@ -429,13 +429,13 @@ For each motion primitive, we compute its duration by using a nominal constant v
 %\footnote{Computing a plan using these motion primitives is not guaranteed to respect the acceleration limits of $\calR$. However, in practice this seldom occurs and we elaborate in Sec.~\ref{sec:eval} how we handle these execution errors.}.
 %
 
-The second type of motion primitives are dynamic primitives. They are generated by the search only at the states that represent the arm configurations where the end effector is close to the object. These primitives correspond to the actual grasping of the object while it is moving.
+The second type of primitives are dynamic primitives. They are generated by the search only at the states that represent the arm configurations where the end effector is close to the object. These primitives correspond to the actual grasping of the object while it is moving.
 The dynamic primitives are generated by using a Jacobian pseudo inverse-based control law similar to what~\cite{menon2014motion} used. 
 The velocity of the end effector is computed such that the end-effector minimizes the distance to the grasp pose. Once the gripper encloses the object, it moves along with the object until the gripper is closed.
 %Additional details omitted due to lack of space. 
 
 \textbf{Motion planner.}
-The states and the transitions implicitly define a graph $\calG = (S,E)$ where $S$ is the set of all states and~$E$ is the set of all transitions defined by the motion primitives. We use Weighted A* (wA*)~\cite{pohl1970heuristic} to find a path in $\calG$ from a given state~$s$ to a goal state $g$. 
+The states and the transitions implicitly define a graph $\calG = (S,E)$ where $S$ is the set of all states and~$E$ is the set of all transitions defined by the motion primitives. We use Weighted A* (wA*)~\cite{pohl1970heuristic} to find a path in $\calG$ from a given state~$s$ to a goal $g$. 
 wA* is a suboptimal heursitic search algorithm that allows a tradeoff between optimality and greediness by inflating the heuristic function by a given weight~$w$. 
 The search is guided by an efficient and fast-to-compute heuristic function which in our case has two components.
 The first component drives the search to intercept the object at the right time and 
@@ -448,13 +448,13 @@ $$
 Here, $t(s,g)$ is the expected time to intercept the object which can be analytically computed from the velocities and positions of the target object and the end-effector and \textsc{AngleDiff}($s,g$) gives the magnitude of angular difference between the end-effector's current pose and target pose. The coefficient $\lambda$ is used as a weighting factor.
 
 \subsubsection{Planning with Experience Reuse}
-We now show how previously-computed paths which we named as root paths can be reused as experiences in our framework. Given a heuristic function $h$ we define for a root path $\Pi$ and a goal state $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the  state that is closest to~$g$ with respect~$h$.
+We now show how previously-computed paths which we named as root paths can be reused as experiences in our framework. Given a heuristic function $h$ we define for a root path $\Pi$ and a goal $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the  state that is closest to~$g$ with respect~$h$.
 Namely,
 %\vspace{-3mm}
 $$
 \Ssc (\Pi,g) := \argmin\limits_{s_i \in \Pi} h(s_i, g).
 $$
-Now, when searching for a path to a goal state $g \in \Gfull$ using root path $\Pi$ as an experience, we add $\Ssc (\Pi,g)$ as a successor for any state along~$\Pi$
+Now, when searching for a path to a goal $g \in \Gfull$ using root path $\Pi$ as an experience, we add $\Ssc (\Pi,g)$ as a successor for any state along~$\Pi$
 (subject to the constraint that the path along $\Pi$ to \Ssc is collision free). In this manner we reuse previous experience to quickly reach a state close to the $g$.
 
 \ignore{
@@ -469,12 +469,12 @@ In our setting, we use a simplified version of the aforementioned approach which
 %
 The key insight is that in our setting, we always start at \Shome which is the first state on all root paths. Thus, we only need to bias the search to stay on a root path (and we don't need to bias the search efforts to get onto the previously-computed paths).
 %
-To this end, given a heuristic function $h$ we define for each root path $\Pi$ and each goal state $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the   state that is closest to~$g$ with respect~$h$.
+To this end, given a heuristic function $h$ we define for each root path $\Pi$ and each goal $g \in \Gfull$ the \emph{shortcut} state $\Ssc (\Pi,g)$ as the   state that is closest to~$g$ with respect~$h$.
 Namely,
 $$
 \Ssc (\Pi,g) := \argmin\limits_{s_i \in \Pi} h(s_i, g).
 $$
-Now, when searching for a path to a goal state $g \in \Gfull$ we
+Now, when searching for a path to a goal $g \in \Gfull$ we
 (i)~add $\Ssc (\Pi,g)$ as a successor for any state along $\Pi$
 (subject to the constraint that the path along $\Pi$ to \Ssc is collision free)
 and
@@ -513,7 +513,7 @@ We are finally ready to describe our algorithm describing first the preprocessin
     \end{subfigure}
     \caption{\CaptionTextSize
     First step of the preprocessing stage.
-    (\subref{fig:crp1})~A goal state $g_1$ is sampled and the root path $\Pi_1$ is computed between \Shome and $g_1$.
+    (\subref{fig:crp1})~A goal $g_1$ is sampled and the root path $\Pi_1$ is computed between \Shome and $g_1$.
     %
     (\subref{fig:crp2})~The set $G_1 \subset \Gfull$ of all states that can use $\Pi_1$ as an experience is computed and associated with $\Pi_1$.
     %
@@ -523,18 +523,18 @@ We are finally ready to describe our algorithm describing first the preprocessin
     %\vspace{-5mm}
 \end{figure*}
 
-Our preprocessing stage starts by sampling a goal state~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ the set of goals ~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any $g_j \in G_1$ within~\Tbound.
+Our preprocessing stage starts by sampling a goal~$g_1 \in \Gfull$ and computing a root path~$\Pi_1$ from~$\Shome$ to~$g_1$. We then associate with~$\Pi_1$ the set of goals ~$G_1 \subset \Gfull$ such that~$\Pi_1$ can be used as an experience in reaching any $g_j \in G_1$ within~\Tbound.
 \footnote{In practice, to account for other query phase operations, such as hash table lookups etc., a slightly smaller time than \Tbound is provided to the experience-based planner, to ensure that the overall query time is bounded by \Tbound}
-Thus, all goal states in~$G_1$ are covered by~\Shome.
+Thus, all goals in~$G_1$ are covered by~\Shome.
 %
-We then repeat this process but instead of sampling  a goal state from \Gfull, we sample from $\Gfull \setminus G_1$, thereby removing covered goals from \Gfull in every iteration.
+We then repeat this process but instead of sampling  a goal from \Gfull, we sample from $\Gfull \setminus G_1$, thereby removing covered goals from \Gfull in every iteration.
 At the end of this step, we obtain a set of root paths. 
 Each root path~$\Pi_i$ is associated with a goal set $G_i \subseteq \Gfull$ such that 
 (i)~$\Pi_i$ can be used as an experience for planning to any $g_j \in G_i$ in~\Tbound and 
 (ii)~$\bigcup_i G_i = \textsc{Reachable}(\Shome, \Gfull)$ (i.e all reachable goals for \Shome in \Gfull).
 %
-Alg.~\ref{alg:step1} details this step (when called with arguments (\Shome,\Gfull)). It also returns a set of unreachable goals that are left uncovered.
-The process is also illustrated in Fig.~\ref{fig:crp}.
+Alg.~\ref{alg:step1} details this step (when called with arguments ($\Shome,\Gfull$)). It also returns a set of unreachable goals that are left uncovered.
+The process is illustrated in Fig.~\ref{fig:crp}.
 
 
 
@@ -592,7 +592,7 @@ The process is also illustrated in Fig.~\ref{fig:crp}.
     \AlgFontSize
 \begin{algorithmic}[1]
 \Procedure{TryLatching}{$s,\Psi_{\Shome}\Guncov,\Gcov$}
-%\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goal states for $\Shome$ } 
+%\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goals for $\Shome$ } 
         \For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\Shome}$}
         \label{alg:preprocess:line:latch1a}
             \If{\textsc{CanLatch}($s,\Pi_i$)}
@@ -662,7 +662,7 @@ The process is also illustrated in Fig.~\ref{fig:crp}.
 %    \AlgFontSize
 %\begin{algorithmic}[1]
 %%\State $\Guncovp = \Guncov$; \hspace{3mm} $\Gcovp = \Gcov$ 
-%\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goal states for $\Shome$ } 
+%\State \textbf{Input:} $\Psi_{\Shome}$ \Comment{root paths and goals for $\Shome$ } 
 %        \For {\textbf{each} $(\Pi_i, G_i) \in \Psi_{\Shome}$}
 %        \label{alg:preprocess:line:latch1a}
 %            \If{\textsc{CanLatch}($s,\Pi_i$)}
@@ -725,19 +725,19 @@ Thus, as the outcome of the preprocessing stage a map $\calM: S \times \Gfull \r
 %\end{enumerate}
 
 %\subsubsection{Procrastination is a bliss}
-%Recall that in the straw man algorithm presented in Sec.~\ref{subsec:strawman}, given a path $\Pi$ connecting \Shome to some goal $g$, we computed a path to every goal state $\Gfull \setminus \{g\}$ from all replanable states.
+%Recall that in the straw man algorithm presented in Sec.~\ref{subsec:strawman}, given a path $\Pi$ connecting \Shome to some goal $g$, we computed a path to every goal $\Gfull \setminus \{g\}$ from all replanable states.
 %
 
 \ignore{
-\ref{obs:1} implies that if we can cover a goal state $g'$  by some state~$s$ along $\Pi_g$ (with $g \neq g'$), then we cover $g'$ by all states $\Pi$ that occur before~$s$.
+\ref{obs:1} implies that if we can cover a goal $g'$  by some state~$s$ along $\Pi_g$ (with $g \neq g'$), then we cover $g'$ by all states $\Pi$ that occur before~$s$.
 %
-\ref{obs:2} implies that if we can compute a path connecting one root path to some other root path, a process we term as ``latching'' on to the new path, then the new root path can be used to reach all its associated goal states.
+\ref{obs:2} implies that if we can compute a path connecting one root path to some other root path, a process we term as ``latching'' on to the new path, then the new root path can be used to reach all its associated goals.
 
 We are now ready to describe the second step of our preprocessing stage.
 %
 For every root path $\Pi_i$ we look at the last replanning state $s_{\Pi_i, \Trc}$ (namely, the state that is $t=\Trc$ time from \Shome). For every other root path $\Pi_j$, we test if the motion (a dynamically generated primitive) connecting $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc + \delta_t}$ (the state on $\Pi_j$ that is $\Trc+\delta_t$ away from \Shome) is valid (i.e. is collision free and reachable in time). 
 %
-If this is the case then all goal states in $G_j$ are covered by all replanning states along~$\Pi_i$
+If this is the case then all goals in $G_j$ are covered by all replanning states along~$\Pi_i$
 See Alg.~\ref{alg:preprocess} lines~\ref{alg:preprocess:line:latch1a}-\ref{alg:preprocess:line:latch1a}.
 %
 
@@ -795,7 +795,7 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     using newly-computed root paths. 
     }
     \label{fig:pl_no_latching}
-    %\vspace{-5mm}
+    %\vspace{-1mm}
 \end{figure*}
 
 \begin{figure*}[t]
@@ -830,7 +830,7 @@ See Fig.~\ref{fig:pl} and  Alg.~\ref{alg:all} and~\ref{alg:preprocess}, respecti
     \end{subfigure}
     \caption{\CaptionTextSize
     Preprocess loop for $\Pi_1$ with latching.
-    (\subref{fig:pl1})~The algorithm starts by trying to latch on to every other root path; for successful latches, the corresponding goal states are removed from uncovered region.
+    (\subref{fig:pl1})~The algorithm starts by trying to latch on to every other root path; for successful latches, the corresponding goals are removed from uncovered region.
     %
     (\subref{fig:pl2})~New root paths are computed from $s$ to cover remaining uncovered region.
     %
@@ -961,7 +961,7 @@ In Alg.~\ref{alg:preprocess}, before calling the \textsc{Preprocess} procedure f
 
 %\begin{lemma}[Completeness]
 %\label{lemma:completeness}
-%Let $s$ be a state that $\calR$ is at in the query phase and $g\in \Gfull$ is a goal state.
+%Let $s$ be a state that $\calR$ is at in the query phase and $g\in \Gfull$ is a goal.
 %If~$g$ is reachable from a state $s'$ that is (i)~reachable from $s$ and (ii)~is \Tbound away from $s$ then the planner will compute a path to $g$.
 %\end{lemma}
 %We omit the proof due to lack of space.
@@ -981,9 +981,9 @@ In query phase, Alg.~\ref{alg:query} iterates through all states between~$s$ and
 
 \end{proof}
 
-\begin{lemma}[Constant-time planning]
+\begin{lemma}[Constant-time complexity]
 \label{lemma:bounded_time}
-Let $s$ be a replanable state and $g$ a goal state provided by $\calP$.
+Let $s$ be a replanable state and $g$ a goal provided by $\calP$.
 If~$g$ is reachable, the planner is guaranteed to provide a solution in constant time.
 \end{lemma}
 
@@ -997,7 +997,7 @@ If~$g$ is reachable, the planner is guaranteed to provide a solution in constant
 
 %The analysis provided in Lemma~\ref{lemma:bounded_time} highlights the tradeoff our algorithm takes.
 %If we use a fine discretization of states along the path (namely, we choose a small value for $\delta_t$) then the guaranteed  planning time \Tbound is going to be high but there is a higher chance that any goal $g$ will be reachable.
-%On the other hand, if we use a course discretization (namely, we choose a large value for $\delta_t$) then we reduce~\Tbound at the price that some goal states may not be reachable.
+%On the other hand, if we use a course discretization (namely, we choose a large value for $\delta_t$) then we reduce~\Tbound at the price that some goals may not be reachable.
 %
 
 
@@ -1007,7 +1007,7 @@ If~$g$ is reachable, the planner is guaranteed to provide a solution in constant
 Before describing how this is done, consider two root paths $\Pi_i$ and $\Pi_j$ with associated goal regions $G_i$ and~$G_j$, respectively.
 Now, let $s_i$ and $s_j$ be states on $\Pi_i$ and $\Pi_j$, respectively, such that the timestamp associated with $s_j$ is $\delta_t$ time after the one associated with $s_i$. Furthermore, assume that the path between $s_i$ and $s_j$ is collision free. 
 %
-Now, assume that the robot is executing path $\Pi_i$ (targeting a goal state in $G_i$) and the perception system updates the goal state to be reached as $g_j \in G_j$. 
+Now, assume that the robot is executing path $\Pi_i$ (targeting a goal in $G_i$) and the perception system updates the goal to be reached as $g_j \in G_j$. 
 If the robot did not yet reach $s_i$ then it can reach $g_j$ by
 (i)~continuing to follow $\Pi_i$ until $s_i$ is reached, 
 (ii)~move to $s_j$ on $\Pi_j$ and 
@@ -1033,10 +1033,10 @@ Here, we attempt to re-use the previously-computed paths as much as possible by 
 
 
 More formally, for each root path~$\Pi_i$, we start by considering the last replanning state $s_{\Pi_i, \Trc}$ (namely, the state that is $t=\Trc$ time from \Shome). For every other root path $\Pi_j$, we test if the path connecting $s_{\Pi_i, \Trc}$ to $s_{\Pi_j, \Trc + \delta_t}$ (the state on $\Pi_j$ that is $\Trc+\delta_t$ away from \Shome) is collision free. 
-If this is the case we know that any goal state in $G_j$ can be
+If this is the case we know that any goal in $G_j$ can be
 }
 
-
+%\vspace{-2mm}
 \section{Evaluation}
 \label{sec:eval}
 We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at ~\url{https://youtu.be/iLVPBWxa5b8}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
@@ -1069,6 +1069,7 @@ Path cost [s]                         & 10.11        & 8.19          & 8.28     
 \end{tabular}
 \caption{\CaptionTextSize Simulation results. Here $T_b$ denotes the (possibly arbitrary) timebound that the algorithm uses. Note that for our method $T_b = \Tbound$ is the time bound that the algorithm is ensured to compute a plan.}
 \label{tab:sim_results}
+\vspace{-2mm}
 \end{table*}
 
 
@@ -1129,6 +1130,7 @@ The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During ex
 
 
 \begin{figure}
+\vspace{2mm}
     \centering
     \includegraphics[width=0.5\textwidth]{figs/pose_error2.pdf}
     \caption{\CaptionTextSize A depiction of \Gfull-specification on a conveyor belt (overhead view) and perception noise handling. 
@@ -1141,7 +1143,7 @@ The first plan is generated for the pose shown at $x_{\textrm{exec}}$. During ex
 
 The preprocessing stage (i.e. running Alg.~\ref{alg:preprocess}) took roughly 3.5 hours and the memory footprint following this stage was less than 20Mb.
 %
-This supports our intuition that the domain allows for efficient compression of a massive amount of paths in a reasonable amount of preprocessing time. In all experiments, we used $\Trc =3.5$s
+This supports our intuition that the domain allows for efficient compression of a massive amount of paths in a reasonable amount of preprocessing time. In all experiments, we used $\Trc =3.5$s and $\delta_t = 0.5$s.
 
 
 
@@ -1159,7 +1161,7 @@ A high (low) overlap corresponds in an accurate (inaccurate) pose estimate.
 %
 We use the same strategy to determine the range for which $\calP$'s estimates are accurate and use it to determine the time for the best-pose planning. 
 %This range is found to be 1.05m to 0.95m from the robot's base on the conveyor. 
-Further, for each method, we determine the pickup success rate given that the perception was or wasn't accurate. 
+Further, for each method, we determine the pickup success rate given that the \calP's estimate was or wasn't accurate. 
 
 The experimental results are shown in Table \ref{tab:robot_results}. Our method achieves the highest overall pickup success rate on the robot by a large margin, indicating the importance of continuous replanning with multiple pose estimates. 
 First-pose planning has the least overall success rate due to inaccuracy of pose estimates when the object is far from the robot's camera. 
@@ -1175,15 +1177,15 @@ Best-pose planning performs better overall than the first pose strategy, since i
 \centering
 \begin{tabular}{|c|c|c|c|c|}
 \hline
-                    & \begin{tabular}[c]{@{}c@{}}Overall \\ Pickup\end{tabular}
-                    & Perception 
-                    & \begin{tabular}[c]{@{}c@{}}Pickup \\ (Perception = 1*)\end{tabular} 
-                    & \begin{tabular}[c]{@{}c@{}}Pickup \\ (Perception = 0*)\end{tabular} \\ \hline
+                    & \begin{tabular}[c]{@{}c@{}}Success \\ rate\end{tabular}
+                    & \begin{tabular}[c]{@{}c@{}}Accuracy of \\ \calP $[\%]$ \end{tabular} 
+                    & \begin{tabular}[c]{@{}c@{}}Success rate \\ (Accurate \calP)\end{tabular} 
+                    & \begin{tabular}[c]{@{}c@{}}Success rate \\ (Inaccurate \calP)\end{tabular} \\ \hline
 E1          & \textbf{69.23}                                                                      & 42.31                   & \textbf{83.33}                                                                             & \textbf{57.14}                                                                             \\ \hline
 E2 & 16.00                                                                      & 24.00                   & 66.67                                                                             & 0.00                                                                              \\ \hline
 E3   & 34.61                                                                      & 34.62                   & 55.56                                                                             & 23.53                                                                             \\ \hline
 \end{tabular}
-\caption{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning). Perception = 1 is accurate estimate, Perception = 0 is inaccurate}
+\caption{\CaptionTextSize Real-robot experiments. Success rate for the three experiments (E1---our method, E2---First-pose planning and E3---Best-pose planning).}
 \label{tab:robot_results}
 \vspace{-4mm}
 \end{table}
@@ -1300,6 +1302,7 @@ To summarize, we developed a provably constant-time planning and replanning algo
 %% Use plainnat to work nicely with natbib. 
 
 %\newpage
+\balance
 \bibliographystyle{unsrt}
 \bibliography{references}
 
