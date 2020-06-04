@@ -17,9 +17,11 @@
 \algrenewcommand\algorithmicindent{0.5em} 
 \usepackage{parskip}
 %\usepackage{subfig}
+% \usepackage{svg}
 \usepackage{subcaption}
 \usepackage[dvipsnames]{xcolor}
 % \usepackage{makecell}
+
 
 \newtheorem{lemma}{Lemma}
 
@@ -178,7 +180,8 @@ We experimentally show that constant-time planning and replanning capability is 
     \end{subfigure}
     \begin{subfigure}{0.225\textwidth}
     %   \centering
-        \includegraphics[width=0.9\textwidth]{pose_error_f}
+        \includegraphics[width=\textwidth]{pose_error_plot.pdf}
+        % \includesvg[width=0.9\textwidth]{figs/test.svg}
         \caption{}
         \label{fig:obj2}
     \end{subfigure}
@@ -1038,7 +1041,7 @@ If this is the case we know that any goal state in $G_j$ can be
 
 \section{Evaluation}
 \label{sec:eval}
-We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at~\url{https://tinyurl.com/yaz76x9e}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
+We evaluated our algorithm in simulation and on a real robot. The conveyor speed that we used for all of our results is $0.2m/s$. The experiments video can be found at ~\url{https://tinyurl.com/yaz76x9e}. We used Willow Garage's PR2 robot in our experiments using its 7-DOF arm. The additional time dimension makes the planning problem eight dimensional.
 
 
 \begin{table*}[t]
