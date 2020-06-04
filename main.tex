@@ -56,7 +56,7 @@ urlcolor=blue
 \begin{document}
 
 % paper title
-\title{Provably Constant-time Planning and Replanning for Grasping Objects in Real-time off a Conveyor}
+\title{Provably Constant-time Planning and Replanning for Real-time Grasping Objects off a Conveyor Belt}
 
 % You will get a Paper-ID when submitting a pdf file to the conference system
 % \author{Author Names Omitted for Anonymous Review. Paper-ID [1329]}
@@ -208,7 +208,7 @@ The latter work demonstrated online real-time planning capability. The approach 
 
 \subsection{Preprocessing-based planning}
 Preprocessing-based motion planners often prove beneficial for real-time planning. They analyse the configuration space offline to generate some auxiliary information that can be used online to speed up planning. 
-Probably the best-known example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic} which precomputes a roadmap that can answer any query by connecting the start and goal configurations to the roadmap and then searching the roadmap. \textsf{PRM}s are fast to query yet they do not provide constant-time guarantees.
+Probably the best-known example is the Probablistic Roadmap Method (PRM)~\cite{kavraki1996probabilistic} which precomputes a roadmap that can answer any query by connecting the start and goal configurations to the roadmap and then searching the roadmap. PRMs are fast to query yet they do not provide constant-time guarantees.
 Moreover, in our case, to account for a moving object, they would require edge re-evaluation which is often computationally expensive.
 %
 
@@ -997,7 +997,7 @@ If~$g$ is reachable, the planner is guaranteed to provide a solution in constant
 
 %The analysis provided in Lemma~\ref{lemma:bounded_time} highlights the tradeoff our algorithm takes.
 %If we use a fine discretization of states along the path (namely, we choose a small value for $\delta_t$) then the guaranteed  planning time \Tbound is going to be high but there is a higher chance that any goal $g$ will be reachable.
-%On the other hand, if we use a course discretization (namely, we choose a large value for $\delta_t$) then we reduce~\Tbound at the price that some goals may not be reachable.
+%On the other hand, if we use a coarse discretization (namely, we choose a large value for $\delta_t$) then we reduce~\Tbound at the price that some goals may not be reachable.
 %
 
 
